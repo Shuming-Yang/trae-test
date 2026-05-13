@@ -48,9 +48,12 @@ trae .
 
 ```
 LOCAL_trae-test/
+├── .gitlab-ci.yml     # GitLab CI/CD 設定
+├── CMakeLists.txt     # CMake 建構設定
 ├── README.md          # 專案說明文件
-├── main.c             # 程式進入點
-└── CMakeLists.txt     # CMake 建構設定
+├── main.c             # 主程式碼與中斷處理
+├── main.h             # 主標頭檔案
+└── start.s            # 組合語言啟動程式
 ```
 
 ## 建構與執行
@@ -110,12 +113,24 @@ TRAE IDE 提供兩種主要的 AI 輔助開發模式：
 | 開啟命令選擇區 | Ctrl + Shift + P | Cmd + Shift + P |
 | 快速開啟檔案 | Ctrl + P | Cmd + P |
 
+## GitLab CI/CD
+
+本專案已設定 GitLab CI/CD 自動建構：
+
+- **提交時觸發**：當 `.c`、`.h` 或 `CMakeLists.txt` 變更時自動編譯
+- **排程檢查**：每週一至週五傍晚 18:00 自動執行編譯檢查
+
+### 設定 GitLab 排程
+
+1. 進入 GitLab 專案 → **Build** → **Pipeline schedules**
+2. 新增排程，Cron 語法：`0 18 * * 1-5`
+
 ## 後續計畫
 
-- [ ] 建立專案基礎結構
-- [ ] 選擇開發技術棧
-- [ ] 實作核心功能
-- [ ] 撰寫測試程式
+- [x] 建立專案基礎結構
+- [x] 設定 GitLab CI/CD
+- [x] 實作中斷處理函式
+- [ ] 建立更多測試功能
 - [ ] 文件編寫
 
 ## 相關資源
