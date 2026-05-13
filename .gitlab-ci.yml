@@ -1,5 +1,6 @@
 stages:
   - build
+  - pages
 
 variables:
   CMAKE_GENERATOR: "Ninja"
@@ -42,4 +43,42 @@ weekly_build_check:
   artifacts:
     paths:
       - $BUILD_DIR/trae_test
-    expire_in: 1 week
+    expire_in: 1 month
+
+# GitLab Pages - 自動產生文件網站
+pages:
+  stage: pages
+  image: python:3.9-slim
+  only:
+    changes:
+      - "**/*.c"
+      - "**/*.h"
+      - "**/*.s"
+      - "generate_docs.py"
+      - "CMakeLists.txt"
+    refs:
+      - main
+      - master
+  before_script:
+    - apt-get update && apt-get install -y --no-install-recommends \
+        gcc \
+        make \
+        texlive-latex-base \
+        texlive-fonts-recommended \
+        texlive-fonts-extra \
+        texlive-latex-extra \
+        pandoc
+    - pip install --no-cache-dir mkdocs mkdocs-material pymdown-extensions
+  script:
+    # 建立 docs 目錄
+    - mkdir -p docs
+    # 執行自動文件產生腳本
+    - python3 generate_docs.py
+    # 使用 mkdocs 建立 HTML
+    - mkdocs build --site-dir public
+    # 建立 PDF (使用 pandoc)
+    - cd docs && pandoc index.md -o ../public/trae_test_documentation.pdf --pdf-engine=xelatex -V geometry="margin=2cm"
+  artifacts:
+    paths:
+      - public
+    expire_in: 1 month
