@@ -139,9 +139,10 @@ def generate_mermaid_arch():
         # 轉換成功，回傳 Markdown 圖片語法
         return "![模組架構圖](assets/arch.svg)"
     else:
-        # 轉換失敗，退回原始碼顯示
-        return f"```mermaid\n{code}
-```"
+        # 轉換失敗，退回原始碼顯示 (改用三引號防呆寫法)
+        return f"""```mermaid
+{code}
+```"""
 
 def generate_function_flow_diagram(func_name, save_dir):
     """產生函式流程圖 (自動存至對應原始碼目錄下的 SVG)"""
@@ -175,7 +176,10 @@ def generate_function_flow_diagram(func_name, save_dir):
         # 因為 SVG 和 .md 放在同一個目錄，所以可以直接用檔名當相對路徑
         return f"![{func_name} 執行流程圖]({svg_name})"
     else:
-        return f"```mermaid\n{code}```"
+        # 轉換失敗，退回原始碼顯示 (改用三引號防呆寫法)
+        return f"""```mermaid
+{code}
+```"""
 
 def generate_index_md(total_files, total_funcs):
     content = f"""# TRAE 測試專案文件
@@ -248,7 +252,7 @@ def generate_file_md(filepath, funcs):
 
 def main():
     print("=" * 60)
-    print("TRAE 專案自動文件產生器 (SVG 預先渲染版)")
+    print("TRAE 專案自動文件產生器 (SVG 預先渲染版 - 語法修復完成)")
     print("=" * 60)
     
     print("\n[1/4] 正在搜尋所有 .c 和 .h 檔案...")
