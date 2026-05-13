@@ -7,16 +7,15 @@ from pathlib import Path
 def find_all_source_files():
     """自動搜尋專案內所有 .c 和 .h 檔案"""
     source_files = []
-    for filepath in Path(".").rglob("*.c"):
-        if "build" not in str(filepath):
-            source_files.append(str(filepath))
-    for filepath in Path(".").rglob("*.h"):
-        if "build" not in str(filepath):
-            source_files.append(str(filepath))
+    for filepath in Path(".").rglob("*.[ch]"):
+        path_str = str(filepath)
+        # 排除 build 目錄與 docs 目錄
+        if "build" not in path_str and "docs" not in path_str:
+            source_files.append(path_str)
     return sorted(source_files)
 
 def parse_file(filepath):
-    """解析 C 檔案，提取函式註解與定義"""
+    """解析 C/H 檔案，提取函式註解與定義"""
     if not os.path.exists(filepath):
         return []
     
@@ -100,13 +99,6 @@ graph TD
     C -.->|設定| J
 ```'''
 
-def generate_function_table(funcs):
-    table = "| 函式名稱 | 所在檔案 | 功能說明 |\n"
-    table += "|---------|----------|---------|\n"
-    for f in funcs:
-        table += f"| {f['name']} | {f['file']} | {f['brief']} |\n"
-    return table
-
 def generate_function_flow_diagram(func_name):
     diagrams = {
         "main": '''```mermaid
@@ -131,7 +123,8 @@ flowchart TD
     }
     return diagrams.get(func_name, "")
 
-def generate_index_md(all_funcs, source_files):
+def generate_index_md(total_files, total_funcs):
+    """產生首頁 (Dashboard)"""
     content = f"""# TRAE 測試專案文件
 
 **文件產生時間**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
@@ -141,18 +134,7 @@ def generate_index_md(all_funcs, source_files):
 ## 專案概述
 
 這是一個使用 TRAE IDE 開發的 C 語言嵌入式專案，包含中斷處理功能和 GitLab CI/CD 整合。
-
-### 掃描到的原始碼檔案
-
-| 編號 | 檔案名稱 |
-|------|----------|
-"""
-    for i, f in enumerate(source_files, 1):
-        content += f"| {i} | `{f}` |\n"
-    
-    content += f"""
-
-總共掃描到 {len(source_files)} 個原始碼檔案，擷取出 {len(all_funcs)} 個函式定義。
+總共掃描到 {total_files} 個原始碼檔案，擷取出 {total_funcs} 個函式定義。
 
 ---
 
@@ -162,18 +144,31 @@ def generate_index_md(all_funcs, source_files):
 
 ---
 
-## 函式定義總覽
+## 檔案下載
 
-{generate_function_table(all_funcs)}
+### 📄 PDF 文件 (包含完整架構與原始碼說明)
+
+[📥 下載完整說明文件 (PDF)](trae_test_documentation.pdf)
 
 ---
 
-## 函式詳細說明
-
+*本文件由 GitLab CI 自動掃描原始碼並產生*
 """
-    for f in all_funcs:
+    return content
+
+def generate_file_md(filepath, funcs):
+    """為單一 C/H 檔案產生專屬的 Markdown 頁面"""
+    filename = os.path.basename(filepath)
+    content = f"# {filename}\n\n"
+    content += f"**檔案路徑**: `{filepath}`\n\n---\n\n"
+    
+    if not funcs:
+        content += "> *此檔案目前沒有解析到符合格式的函式註解。*\n"
+        return content
+
+    content += "## 函式詳細說明\n\n"
+    for f in funcs:
         content += f"### {f['name']}\n\n"
-        content += f"**所在檔案**: `{f['file']}`\n\n"
         content += f"**功能說明**: {f['brief']}\n\n"
         
         if f['doc_params']:
@@ -191,56 +186,71 @@ def generate_index_md(all_funcs, source_files):
         flow_diag = generate_function_flow_diagram(f['name'])
         if flow_diag:
             content += "**執行流程圖**:\n\n"
-            content += flow_diag + "\n"
+            content += flow_diag + "\n\n"
+            
+        content += "---\n\n"
         
-        content += "\n---\n\n"
-    
-    content += """## 檔案下載
-
-### 📄 PDF 文件
-
-[下載完整說明文件 (PDF)](trae_test_documentation.pdf)
-
----
-
-*本文件由 GitLab CI 自動掃描原始碼並產生*
-"""
     return content
 
 def main():
     print("=" * 60)
-    print("TRAE 專案自動文件產生器")
+    print("TRAE 專案自動文件產生器 (多階層支援)")
     print("=" * 60)
     
     print("\n[1/4] 正在搜尋所有 .c 和 .h 檔案...")
     source_files = find_all_source_files()
-    print(f"      找到 {len(source_files)} 個原始碼檔案:")
-    for f in source_files:
-        print(f"        - {f}")
+    print(f"      找到 {len(source_files)} 個原始碼檔案")
     
-    print("\n[2/4] 正在解析原始碼檔案...")
-    all_funcs = []
-    for src_file in source_files:
-        if os.path.exists(src_file):
-            funcs = parse_file(src_file)
-            all_funcs.extend(funcs)
-            print(f"      {src_file}: 找到 {len(funcs)} 個函式")
+    print("\n[2/4] 正在解析原始碼檔案並建立獨立頁面...")
+    all_funcs_count = 0
+    nav_entries = []
     
-    print("\n[3/4] 正在建立文件目錄...")
     os.makedirs("docs", exist_ok=True)
     
-    print("\n[4/4] 正在產生文件...")
-    
-    index_md = generate_index_md(all_funcs, source_files)
+    for src_file in source_files:
+        funcs = parse_file(src_file)
+        all_funcs_count += len(funcs)
+        
+        # 將路徑轉換為 docs/api/ 目錄下的結構
+        # 例如 src/main.c -> docs/api/src/main.c.md
+        md_rel_path = f"api/{src_file}.md".replace("\\", "/")
+        md_full_path = os.path.join("docs", md_rel_path)
+        
+        # 確保目標資料夾存在
+        os.makedirs(os.path.dirname(md_full_path), exist_ok=True)
+        
+        # 產生該檔案的 Markdown 內容
+        md_content = generate_file_md(src_file, funcs)
+        with open(md_full_path, "w", encoding="utf-8") as f:
+            f.write(md_content)
+            
+        # 將其加入導覽列選單中
+        nav_entries.append(f"      - '{src_file}': {md_rel_path}")
+        print(f"      ✓ 處理完成: {src_file} ({len(funcs)} 個函式)")
+
+    print("\n[3/4] 正在產生首頁與目錄...")
+    index_md = generate_index_md(len(source_files), all_funcs_count)
     with open("docs/index.md", "w", encoding="utf-8") as f:
         f.write(index_md)
-    print("      ✓ 已產生 docs/index.md")
+        
+    print("\n[4/4] 正在產生雙模式 mkdocs.yml...")
+    nav_yaml_block = "\n".join(nav_entries)
     
-    mkdocs_content = '''site_name: TRAE Test Project Documentation
+    mkdocs_content = f'''site_name: TRAE Test Project Documentation
 site_description: Documentation for the TRAE test project
 site_author: Steven.Yang
 copyright: Copyright (c) 2026 OmniVision Co.,Ltd
 
+# ==========================================
+# 模式切換區 (Theme)
+# ==========================================
+
+# [Mode 1] ReadTheDocs 主題 (目前註解停用)
+# theme:
+#   name: readthedocs
+#   highlightjs: true
+
+# [Mode 2] Material 主題 (支援深淺色切換 - 目前啟用)
 theme:
   name: material
   features:
@@ -276,9 +286,14 @@ markdown_extensions:
 
 plugins:
   - search
+  - pdf-export:
+      combined: true
+      combined_output_path: trae_test_documentation.pdf
 
 nav:
   - 首頁: index.md
+  - 原始碼結構:
+{nav_yaml_block}
 
 extra:
   social:
@@ -287,10 +302,10 @@ extra:
 '''
     with open("mkdocs.yml", "w", encoding="utf-8") as f:
         f.write(mkdocs_content)
-    print("      ✓ 已產生 mkdocs.yml")
+    print("      ✓ 已產生 mkdocs.yml (配置 pdf-export 外掛與導覽列)")
     
     print("\n" + "=" * 60)
-    print(f"文件產生完成！共處理 {len(source_files)} 個檔案，{len(all_funcs)} 個函式")
+    print(f"文件產生完成！共處理 {len(source_files)} 個檔案，{all_funcs_count} 個函式")
     print("=" * 60)
 
 if __name__ == "__main__":
