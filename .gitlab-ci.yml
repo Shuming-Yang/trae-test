@@ -61,7 +61,7 @@ pages:
       - master
   script:
     # 安裝文件產生所需的 Python 套件 (包含 mkdocs PDF 外掛)
-    - pip install --no-cache-dir mkdocs mkdocs-material pymdown-extensions mkdocs-pdf-export-plugin
+    - pip install --break-system-packages --no-cache-dir mkdocs mkdocs-material pymdown-extensions mkdocs-pdf-export-plugin
     # 建立 docs 目錄
     - mkdir -p docs
     # 執行自動文件產生腳本
