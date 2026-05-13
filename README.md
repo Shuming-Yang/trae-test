@@ -1,93 +1,129 @@
-# trae-test
+# TRAE 測試專案
 
+## 專案介紹
 
+這是一個使用 **TRAE IDE** 進行開發的測試專案。TRAE 是一個 AI 原生的整合開發環境，深度整合 AI 大語言模型，提供智慧問答、程式碼自動補全與 AI 自動程式設計能力。
 
-## Getting started
+## 專案目的
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+- 學習與熟悉 TRAE IDE 的各項功能
+- 測試 AI 輔助開發的工作流程
+- 建立 TRAE 專案開發的基礎範本
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+## 關於 TRAE IDE
 
-## Add your files
+TRAE（讀作 /treɪ/）是字節跳動推出的 AI 原生整合開發環境，主要特色包括：
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+- 🤖 **內建 AI 助手**：支援 Chat（問答）和 Builder（專案建構）兩種模式
+- 🌐 **全中文介面**：無需安裝漢化外掛，開箱即用
+- 🔌 **VS Code 生態相容**：可一鍵匯入外掛、快捷鍵、設定檔
+- 🖥️ **多平台支援**：Windows 和 macOS
+- 🆓 **完全免費**：無需付費訂閱即可使用 AI 功能
+
+## 開始使用
+
+### 環境需求
+
+- Windows 10/11 或 macOS 10.15+
+- 記憶體：建議 8GB 以上
+- 磁碟空間：2GB 可用空間
+
+### 安裝 TRAE IDE
+
+1. 造訪 TRAE 官網：https://www.trae.com.cn/
+2. 下載對應作業系統的安裝檔
+3. 依照安裝精靈完成安裝
+4. 使用手機號碼或稀土掘金帳號登入
+
+### 開啟專案
+
+```bash
+# 在終端中使用 trae 指令開啟此專案
+trae .
+```
+
+或者在 TRAE IDE 中選擇「檔案」→「開啟資料夾」，選擇此專案目錄。
+
+## 專案結構
 
 ```
-cd existing_repo
-git remote add origin https://GitLab.ovt.com:8081/steven.yang/trae-test.git
-git branch -M main
-git push -uf origin main
+LOCAL_trae-test/
+├── README.md          # 專案說明文件
+├── main.c             # 程式進入點
+└── CMakeLists.txt     # CMake 建構設定
 ```
 
-## Integrate with your tools
+## 建構與執行
 
-- [ ] [Set up project integrations](https://GitLab.ovt.com:8081/steven.yang/trae-test/-/settings/integrations)
+### 使用 CMake 建構
 
-## Collaborate with your team
+```bash
+# 建立建構目錄
+mkdir build
+cd build
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+# 設定 CMake 專案
+cmake ..
 
-## Test and Deploy
+# 編譯
+cmake --build .
 
-Use the built-in continuous integration in GitLab.
+# 執行程式
+./trae_test  # Linux/macOS
+# 或
+.\trae_test.exe  # Windows
+```
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+### 開發時快速建構 (Windows)
 
-***
+```bash
+cmake -B build
+cmake --build build
+.\build\trae_test.exe
+```
 
-# Editing this README
+## 開發模式
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+TRAE IDE 提供兩種主要的 AI 輔助開發模式：
 
-## Suggestions for a good README
+### Chat 模式
+適用於開發過程中的隨時問答，例如：
+- 解釋程式碼的作用
+- 尋找 Bug 並提供修復方案
+- 詢問 API 使用方式
+- 優化程式碼邏輯
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+### Builder 模式
+適用於從零開始建構專案，只需用自然語言描述需求，AI 會自動：
+- 建立專案目錄結構
+- 生成所需檔案
+- 執行終端指令
+- 分析指令執行狀態
 
-## Name
-Choose a self-explaining name for your project.
+## 常用快捷鍵
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+| 功能 | Windows/Linux | macOS |
+|------|---------------|-------|
+| 開啟側邊對話 | Ctrl + U | Cmd + U |
+| 內聯 AI 聊天 | Ctrl + I | Cmd + I |
+| 切換終端 | Ctrl + ` | Cmd + ` |
+| 開啟命令選擇區 | Ctrl + Shift + P | Cmd + Shift + P |
+| 快速開啟檔案 | Ctrl + P | Cmd + P |
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+## 後續計畫
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+- [ ] 建立專案基礎結構
+- [ ] 選擇開發技術棧
+- [ ] 實作核心功能
+- [ ] 撰寫測試程式
+- [ ] 文件編寫
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+## 相關資源
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+- [TRAE 官方網站](https://www.trae.com.cn/)
+- [TRAE 教學文件](https://www.runoob.com/ai-agent/trae-quick-star.html)
+- [GitLab 文件](https://docs.gitlab.com/)
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+## 授權
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
-
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+本專案僅供學習與測試使用。

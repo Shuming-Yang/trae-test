@@ -1,0 +1,19 @@
+# exclude directory
+**/build/
+**/CMakeFiles/
+**/__*py*__/
+**/__pycache__/
+**/.venv/
+
+# exclude files
+**/CMakeCache.txt
+.DS_Store
+*.bak
+*.tmp
+*.new
+*.old
+README.pdf
+**/report*.html
+
+# include files
+# \!build/*.dll
