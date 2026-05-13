@@ -60,19 +60,20 @@ pages:
       - main
       - master
   script:
-    # 安裝文件產生所需的 Python 套件 (包含 mkdocs PDF 外掛)
-    - pip install --break-system-packages --no-cache-dir mkdocs mkdocs-material pymdown-extensions mkdocs-pdf-export-plugin
+    # 安裝文件產生所需的 Python 套件
+    - pip install --break-system-packages --no-cache-dir mkdocs mkdocs-material pymdown-extensions
     # 建立 docs 目錄
     - mkdir -p docs
     # 執行自動文件產生腳本
     - python3 generate_docs.py
     # 使用 mkdocs 建立 HTML
     - mkdocs build --site-dir public
-    # 將 mkdocs 產生的 PDF 移動到 public 目錄
+    # 使用 weasyprint 直接將 HTML 轉換成 PDF
     - |
-      if [ -f "site/pdf/document.pdf" ]; then
-        mkdir -p public
-        cp site/pdf/document.pdf public/trae_test_documentation.pdf
+      if command -v weasyprint &> /dev/null; then
+        if [ -f "public/index.html" ]; then
+          weasyprint public/index.html public/trae_test_documentation.pdf
+        fi
       fi
   artifacts:
     paths:

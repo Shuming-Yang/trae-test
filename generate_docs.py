@@ -276,11 +276,6 @@ markdown_extensions:
 
 plugins:
   - search
-  - pdf-export:
-      combined: true
-      combined_output_path: pdf/document.pdf
-      theme: material
-      verbose: true
 
 nav:
   - 首頁: index.md
@@ -292,7 +287,7 @@ extra:
 '''
     with open("mkdocs.yml", "w", encoding="utf-8") as f:
         f.write(mkdocs_content)
-    print("      ✓ 已產生 mkdocs.yml (包含 PDF 匯出外掛)")
+    print("      ✓ 已產生 mkdocs.yml")
     
     print("\n" + "=" * 60)
     print(f"文件產生完成！共處理 {len(source_files)} 個檔案，{len(all_funcs)} 個函式")
