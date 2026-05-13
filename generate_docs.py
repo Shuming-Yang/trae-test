@@ -2,6 +2,7 @@
 import os
 import re
 import subprocess
+import base64
 from datetime import datetime
 from pathlib import Path
 
@@ -26,13 +27,13 @@ def render_mermaid_to_svg(mermaid_code, out_svg_path):
         f.write(mermaid_code)
 
     try:
-        # 呼叫系統的 mmdc 進行無頭轉換
+        # 呼叫系統的 mmdc 進行無頭轉換 (改用 white 背景避免 PDF 渲染成透明或黑框)
         subprocess.run([
             "mmdc",
             "-i", mmd_filename,
             "-o", out_svg_path,
             "-p", config_path,
-            "-b", "transparent" # 背景透明
+            "-b", "white" 
         ], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         return True
     except subprocess.CalledProcessError as e:
@@ -41,6 +42,12 @@ def render_mermaid_to_svg(mermaid_code, out_svg_path):
     finally:
         if os.path.exists(mmd_filename):
             os.remove(mmd_filename)
+
+def get_base64_image_md(filepath, alt_text):
+    """將實體 SVG 圖片讀取並轉換為 Base64 Markdown 語法，徹底解決 PDF 延遲載入空白問題"""
+    with open(filepath, "rb") as f:
+        encoded_string = base64.b64encode(f.read()).decode('utf-8')
+    return f"![{alt_text}](data:image/svg+xml;base64,{encoded_string})"
 
 # ==========================================
 # 專案原始碼解析
@@ -116,7 +123,7 @@ def parse_file(filepath):
 # Markdown 與圖表生成
 # ==========================================
 def generate_mermaid_arch():
-    """產生系統架構圖 (自動轉為實體 SVG)"""
+    """產生系統架構圖"""
     code = """graph TD
     A[start.s<br/>重置入口] --> B[_except_reset]
     B --> C[main.c<br/>main 函式]
@@ -136,16 +143,16 @@ def generate_mermaid_arch():
     svg_path = "docs/assets/arch.svg"
     
     if render_mermaid_to_svg(code, svg_path):
-        # 轉換成功，回傳 Markdown 圖片語法
-        return "![模組架構圖](assets/arch.svg)"
+        # 轉換成功，直接將圖片編碼成 Base64 塞入 Markdown
+        return get_base64_image_md(svg_path, "模組架構圖")
     else:
-        # 轉換失敗，退回原始碼顯示 (改用三引號防呆寫法)
+        # 轉換失敗，退回原始碼顯示
         return f"""```mermaid
 {code}
 ```"""
 
 def generate_function_flow_diagram(func_name, save_dir):
-    """產生函式流程圖 (自動存至對應原始碼目錄下的 SVG)"""
+    """產生函式流程圖"""
     diagrams = {
         "main": """flowchart TD
     Start([開始]) --> Init[初始化中斷處理器指標]
@@ -173,10 +180,10 @@ def generate_function_flow_diagram(func_name, save_dir):
     svg_full_path = os.path.join(save_dir, svg_name)
     
     if render_mermaid_to_svg(code, svg_full_path):
-        # 因為 SVG 和 .md 放在同一個目錄，所以可以直接用檔名當相對路徑
-        return f"![{func_name} 執行流程圖]({svg_name})"
+        # 轉換成功，直接將圖片編碼成 Base64 塞入 Markdown
+        return get_base64_image_md(svg_full_path, f"{func_name} 執行流程圖")
     else:
-        # 轉換失敗，退回原始碼顯示 (改用三引號防呆寫法)
+        # 轉換失敗，退回原始碼顯示
         return f"""```mermaid
 {code}
 ```"""
@@ -213,7 +220,6 @@ def generate_index_md(total_files, total_funcs):
     return content
 
 def generate_file_md(filepath, funcs):
-    # 計算該檔案 Markdown 存放的完整路徑
     md_rel_path = f"api/{filepath}.md".replace("\\", "/")
     md_full_path = os.path.join("docs", md_rel_path)
     save_dir = os.path.dirname(md_full_path)
@@ -240,7 +246,6 @@ def generate_file_md(filepath, funcs):
         if f['doc_retval']:
             content += f"**回傳值**: {f['doc_retval']}\n\n"
         
-        # 呼叫流程圖生成器，將 SVG 直接存放在該 .md 的同一個資料夾內
         flow_diag = generate_function_flow_diagram(f['name'], save_dir)
         if flow_diag:
             content += "**執行流程圖**:\n\n"
@@ -252,7 +257,7 @@ def generate_file_md(filepath, funcs):
 
 def main():
     print("=" * 60)
-    print("TRAE 專案自動文件產生器 (SVG 預先渲染版 - 語法修復完成)")
+    print("TRAE 專案自動文件產生器 (Base64 圖片鑲嵌版)")
     print("=" * 60)
     
     print("\n[1/4] 正在搜尋所有 .c 和 .h 檔案...")
@@ -269,14 +274,13 @@ def main():
         funcs = parse_file(src_file)
         all_funcs_count += len(funcs)
         
-        # 產生內容並同步轉譯所需的 SVG 圖表
         md_content, md_full_path, md_rel_path = generate_file_md(src_file, funcs)
         
         with open(md_full_path, "w", encoding="utf-8") as f:
             f.write(md_content)
             
         nav_entries.append(f"      - '{src_file}': {md_rel_path}")
-        print(f"      ✓ 處理完成: {src_file} ({len(funcs)} 個函式，圖表已嵌入)")
+        print(f"      ✓ 處理完成: {src_file} ({len(funcs)} 個函式，圖表已轉換為 Base64 嵌入)")
 
     print("\n[3/4] 正在產生首頁...")
     index_md = generate_index_md(len(source_files), all_funcs_count)
@@ -290,6 +294,7 @@ def main():
 site_description: Documentation for the TRAE test project
 site_author: Steven.Yang
 
+# 雙模式配置 (符合您之前的設定習慣)
 theme:
   name: material
   features:
@@ -327,7 +332,7 @@ nav:
     print("      ✓ 已產生 mkdocs.yml")
     
     print("\n" + "=" * 60)
-    print("文件產生與圖表預渲染完成！可以開始 mkdocs build 囉！")
+    print("文件產生完成！所有圖片皆已採用 Base64 絕對鑲嵌，不再受到 PDF 延遲載入影響。")
     print("=" * 60)
 
 if __name__ == "__main__":
