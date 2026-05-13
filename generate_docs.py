@@ -7,9 +7,7 @@ from pathlib import Path
 def find_all_source_files():
     """自動搜尋專案內所有 .c 和 .h 檔案"""
     source_files = []
-    # 搜尋目前目錄與子目錄
     for filepath in Path(".").rglob("*.c"):
-        # 排除 build 目錄
         if "build" not in str(filepath):
             source_files.append(str(filepath))
     for filepath in Path(".").rglob("*.h"):
@@ -30,7 +28,6 @@ def parse_file(filepath):
         lines = f.readlines()
         
     for i, line in enumerate(lines):
-        # 偵測函式註解開始
         if "/**" in line:
             in_comment = True
             current_comment = []
@@ -43,7 +40,6 @@ def parse_file(filepath):
             current_comment.append(line.strip())
             continue
             
-        # 偵測函式定義 (支援基本類型)
         func_pattern = r"^(?:(?:void|int|char|unsigned|short|long|static|inline)\s+)+(\w+)\s*\((.*?)\)"
         func_match = re.match(func_pattern, line.strip())
         
@@ -57,7 +53,6 @@ def parse_file(filepath):
             retval = ""
             file_tag = ""
             
-            # 解析註解內容
             for cline in current_comment:
                 if "@brief" in cline:
                     brief = cline.split("@brief", 1)[1].strip(" :")
@@ -70,7 +65,6 @@ def parse_file(filepath):
                 if "@file" in cline:
                     file_tag = cline.split("@file", 1)[1].strip()
             
-            # 如果註解中有 @file 就使用，否則使用檔案名
             display_file = file_tag if file_tag else filepath
             
             funcs.append({
@@ -89,7 +83,6 @@ def parse_file(filepath):
     return funcs
 
 def generate_mermaid_arch():
-    """產生模組架構圖"""
     return '''```mermaid
 graph TD
     A[start.s<br/>重置入口] --> B[_except_reset]
@@ -108,7 +101,6 @@ graph TD
 ```'''
 
 def generate_function_table(funcs):
-    """產生函式定義表格"""
     table = "| 函式名稱 | 所在檔案 | 功能說明 |\n"
     table += "|---------|----------|---------|\n"
     for f in funcs:
@@ -116,7 +108,6 @@ def generate_function_table(funcs):
     return table
 
 def generate_function_flow_diagram(func_name):
-    """根據函式名稱產生對應的流程圖"""
     diagrams = {
         "main": '''```mermaid
 flowchart TD
@@ -141,7 +132,6 @@ flowchart TD
     return diagrams.get(func_name, "")
 
 def generate_index_md(all_funcs, source_files):
-    """產生 index.md 內容"""
     content = f"""# TRAE 測試專案文件
 
 **文件產生時間**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
@@ -198,7 +188,6 @@ def generate_index_md(all_funcs, source_files):
         if f['remark']:
             content += f"**備註**: {f['remark']}\n\n"
         
-        # 添加流程圖
         flow_diag = generate_function_flow_diagram(f['name'])
         if flow_diag:
             content += "**執行流程圖**:\n\n"
@@ -219,19 +208,16 @@ def generate_index_md(all_funcs, source_files):
     return content
 
 def main():
-    """主函式"""
     print("=" * 60)
     print("TRAE 專案自動文件產生器")
     print("=" * 60)
     
-    # 步驟 1: 自動搜尋所有原始碼
     print("\n[1/4] 正在搜尋所有 .c 和 .h 檔案...")
     source_files = find_all_source_files()
     print(f"      找到 {len(source_files)} 個原始碼檔案:")
     for f in source_files:
         print(f"        - {f}")
     
-    # 步驟 2: 解析所有檔案
     print("\n[2/4] 正在解析原始碼檔案...")
     all_funcs = []
     for src_file in source_files:
@@ -240,20 +226,16 @@ def main():
             all_funcs.extend(funcs)
             print(f"      {src_file}: 找到 {len(funcs)} 個函式")
     
-    # 步驟 3: 建立 docs 目錄
     print("\n[3/4] 正在建立文件目錄...")
     os.makedirs("docs", exist_ok=True)
     
-    # 步驟 4: 產生文件
     print("\n[4/4] 正在產生文件...")
     
-    # 產生 index.md
     index_md = generate_index_md(all_funcs, source_files)
     with open("docs/index.md", "w", encoding="utf-8") as f:
         f.write(index_md)
     print("      ✓ 已產生 docs/index.md")
     
-    # 產生 mkdocs.yml
     mkdocs_content = '''site_name: TRAE Test Project Documentation
 site_description: Documentation for the TRAE test project
 site_author: Steven.Yang
@@ -292,6 +274,14 @@ markdown_extensions:
   - pymdownx.emoji
   - attr_list
 
+plugins:
+  - search
+  - pdf-export:
+      combined: true
+      combined_output_path: pdf/document.pdf
+      theme: material
+      verbose: true
+
 nav:
   - 首頁: index.md
 
@@ -302,7 +292,7 @@ extra:
 '''
     with open("mkdocs.yml", "w", encoding="utf-8") as f:
         f.write(mkdocs_content)
-    print("      ✓ 已產生 mkdocs.yml")
+    print("      ✓ 已產生 mkdocs.yml (包含 PDF 匯出外掛)")
     
     print("\n" + "=" * 60)
     print(f"文件產生完成！共處理 {len(source_files)} 個檔案，{len(all_funcs)} 個函式")

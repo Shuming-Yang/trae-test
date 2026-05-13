@@ -1,22 +1,26 @@
+variables:
+  GIT_SSL_NO_VERIFY: "true"
+  CMAKE_GENERATOR: "Ninja"
+  BUILD_DIR: "build"
+
+image: atb-compiler-env:v1
+
+cache:
+  paths:
+    - .cache/pip
+
 stages:
   - build
   - pages
 
-variables:
-  CMAKE_GENERATOR: "Ninja"
-  BUILD_DIR: "build"
-
 # 當 .c 或 .h 檔案變更時自動編譯
 build_on_commit:
   stage: build
-  image: gcc:latest
   only:
     changes:
       - "**/*.c"
       - "**/*.h"
       - "CMakeLists.txt"
-  before_script:
-    - apt-get update && apt-get install -y cmake ninja-build
   script:
     - mkdir -p $BUILD_DIR
     - cd $BUILD_DIR
@@ -30,11 +34,8 @@ build_on_commit:
 # 每週傍晚（週一至週五 18:00）執行一次編譯檢查
 weekly_build_check:
   stage: build
-  image: gcc:latest
   only:
     - schedules
-  before_script:
-    - apt-get update && apt-get install -y cmake ninja-build
   script:
     - mkdir -p $BUILD_DIR
     - cd $BUILD_DIR
@@ -48,7 +49,6 @@ weekly_build_check:
 # GitLab Pages - 自動產生文件網站
 pages:
   stage: pages
-  image: python:3.9-slim
   only:
     changes:
       - "**/*.c"
@@ -59,25 +59,21 @@ pages:
     refs:
       - main
       - master
-  before_script:
-    - apt-get update && apt-get install -y --no-install-recommends \
-        gcc \
-        make \
-        texlive-latex-base \
-        texlive-fonts-recommended \
-        texlive-fonts-extra \
-        texlive-latex-extra \
-        pandoc
-    - pip install --no-cache-dir mkdocs mkdocs-material pymdown-extensions
   script:
+    # 安裝文件產生所需的 Python 套件 (包含 mkdocs PDF 外掛)
+    - pip install --no-cache-dir mkdocs mkdocs-material pymdown-extensions mkdocs-pdf-export-plugin
     # 建立 docs 目錄
     - mkdir -p docs
     # 執行自動文件產生腳本
     - python3 generate_docs.py
     # 使用 mkdocs 建立 HTML
     - mkdocs build --site-dir public
-    # 建立 PDF (使用 pandoc)
-    - cd docs && pandoc index.md -o ../public/trae_test_documentation.pdf --pdf-engine=xelatex -V geometry="margin=2cm"
+    # 將 mkdocs 產生的 PDF 移動到 public 目錄
+    - |
+      if [ -f "site/pdf/document.pdf" ]; then
+        mkdir -p public
+        cp site/pdf/document.pdf public/trae_test_documentation.pdf
+      fi
   artifacts:
     paths:
       - public
