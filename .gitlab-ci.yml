@@ -68,11 +68,11 @@ pages:
     - python3 generate_docs.py
     # 使用 mkdocs 建立 HTML
     - mkdocs build --site-dir public
-    # 使用 weasyprint 直接將 HTML 轉換成 PDF
+    # 使用 weasyprint 直接將 HTML 轉換成 PDF (忽略 CSS 警告)
     - |
       if command -v weasyprint &> /dev/null; then
         if [ -f "public/index.html" ]; then
-          weasyprint public/index.html public/trae_test_documentation.pdf
+          weasyprint public/index.html public/trae_test_documentation.pdf 2>/dev/null
         fi
       fi
   artifacts:
