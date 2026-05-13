@@ -47,6 +47,7 @@ weekly_build_check:
     expire_in: 1 month
 
 # GitLab Pages - 自動產生文件網站
+# GitLab Pages - 自動產生文件網站
 pages:
   stage: pages
   only:
@@ -60,21 +61,11 @@ pages:
       - main
       - master
   script:
-    # 安裝文件產生所需的 Python 套件
-    - pip install --break-system-packages --no-cache-dir mkdocs mkdocs-material pymdown-extensions
-    # 建立 docs 目錄
     - mkdir -p docs
-    # 執行自動文件產生腳本
+    # 執行自動文件產生腳本 (會自動生成所有 markdown 頁面與 mkdocs.yml)
     - python3 generate_docs.py
-    # 使用 mkdocs 建立 HTML
+    # 使用 mkdocs 建立 HTML，PDF 外掛會在背景自動生成整份文件的 PDF
     - mkdocs build --site-dir public
-    # 使用 weasyprint 直接將 HTML 轉換成 PDF (忽略 CSS 警告)
-    - |
-      if command -v weasyprint &> /dev/null; then
-        if [ -f "public/index.html" ]; then
-          weasyprint public/index.html public/trae_test_documentation.pdf 2>/dev/null
-        fi
-      fi
   artifacts:
     paths:
       - public
