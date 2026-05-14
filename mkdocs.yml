@@ -4,6 +4,7 @@
 site_name: IRQ Simulator - ASPICE Documentation
 site_description: ASPICE software development documentation for IRQ Simulator project
 site_author: Steven.Yang
+site_url: https://steven.yang.gitlab.io/trae-test/
 
 # ==========================================
 # Directory Configuration
