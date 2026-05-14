@@ -461,7 +461,19 @@ def generate_file_md(filepath, funcs, lang):
 # 主首頁 (docs/index.html) — 固定頂欄 + 右側語系下拉，預設英文
 # ==========================================
 def generate_main_index_html():
-    html_content = """<!DOCTYPE html>
+    # 預先讀取三個語系的 index markdown 內容
+    index_contents = {}
+    for lang in LANGUAGES:
+        md_path = os.path.join("docs", f"index_{lang}.md")
+        if os.path.exists(md_path):
+            with open(md_path, "r", encoding="utf-8") as f:
+                raw = f.read()
+                escaped = raw.replace("\\", "\\\\").replace("`", "\\`").replace("$", "\\$")
+                index_contents[lang] = escaped
+        else:
+            index_contents[lang] = f"# Missing\\n\\nFile `index_{lang}.md` not found."
+
+    html_content = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -469,7 +481,7 @@ def generate_main_index_html():
     <title>IRQ Simulator - Documentation</title>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
-        :root {
+        :root {{
             --bg: #f5f5f5;
             --card-bg: #ffffff;
             --text: #333333;
@@ -479,17 +491,17 @@ def generate_main_index_html():
             --code-bg: #f0f0f0;
             --table-stripe: #f9f9f9;
             --shadow: 0 2px 8px rgba(0,0,0,0.08);
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
+        }}
+        * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+        body {{
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
             background: var(--bg);
             color: var(--text);
             line-height: 1.7;
             min-height: 100vh;
-        }
+        }}
 
-        .topbar {
+        .topbar {{
             position: fixed;
             top: 0; left: 0; right: 0;
             z-index: 1000;
@@ -501,24 +513,24 @@ def generate_main_index_html():
             justify-content: space-between;
             padding: 0 24px;
             height: 52px;
-        }
-        .topbar .brand {
+        }}
+        .topbar .brand {{
             font-weight: 700;
             font-size: 16px;
             color: #222;
             white-space: nowrap;
-        }
-        .topbar .lang-wrap {
+        }}
+        .topbar .lang-wrap {{
             display: flex;
             align-items: center;
             gap: 8px;
-        }
-        .topbar .lang-wrap label {
+        }}
+        .topbar .lang-wrap label {{
             font-size: 13px;
             color: var(--text-secondary);
             white-space: nowrap;
-        }
-        .topbar .lang-wrap select {
+        }}
+        .topbar .lang-wrap select {{
             padding: 6px 32px 6px 12px;
             border: 1px solid var(--border);
             border-radius: 6px;
@@ -531,57 +543,55 @@ def generate_main_index_html():
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
             background-repeat: no-repeat;
             background-position: right 10px center;
-        }
-        .topbar .lang-wrap select:focus {
+        }}
+        .topbar .lang-wrap select:focus {{
             outline: none;
             border-color: var(--accent);
             box-shadow: 0 0 0 2px rgba(74,144,217,0.2);
-        }
+        }}
 
-        .container {
+        .container {{
             max-width: 960px;
             margin: 0 auto;
             padding: 80px 24px 64px;
-        }
-        #content {
+        }}
+        #content {{
             background: var(--card-bg);
             border-radius: 8px;
             padding: 40px 48px;
             box-shadow: var(--shadow);
             min-height: 400px;
-        }
+        }}
 
-        #content h1 { font-size: 28px; border-bottom: 2px solid var(--accent); padding-bottom: 12px; margin-bottom: 20px; color: #222; }
-        #content h2 { font-size: 22px; margin-top: 36px; margin-bottom: 16px; color: #333; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
-        #content h3 { font-size: 18px; margin-top: 28px; margin-bottom: 12px; color: #444; }
-        #content p { margin-bottom: 14px; }
-        #content strong { color: #222; }
-        #content a { color: var(--accent); text-decoration: none; }
-        #content a:hover { text-decoration: underline; }
-        #content code { background: var(--code-bg); padding: 2px 6px; border-radius: 3px; font-family: "SF Mono", "Fira Code", "Consolas", monospace; font-size: 13px; }
-        #content pre { background: #2d2d2d; color: #f8f8f2; padding: 16px 20px; border-radius: 6px; overflow-x: auto; margin: 16px 0; font-size: 13px; line-height: 1.5; }
-        #content pre code { background: none; padding: 0; color: inherit; }
-        #content table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
-        #content th, #content td { border: 1px solid var(--border); padding: 10px 14px; text-align: left; }
-        #content th { background: #f0f5fb; font-weight: 600; color: #333; }
-        #content tr:nth-child(even) td { background: var(--table-stripe); }
-        #content img { max-width: 100%; height: auto; display: block; margin: 16px auto; border-radius: 4px; }
-        #content hr { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
-        #content blockquote { border-left: 4px solid var(--accent); padding: 8px 16px; margin: 16px 0; background: #f8fafc; color: var(--text-secondary); border-radius: 0 4px 4px 0; }
-        #content ul, #content ol { margin: 12px 0 12px 24px; }
-        #content li { margin-bottom: 6px; }
+        #content h1 {{ font-size: 28px; border-bottom: 2px solid var(--accent); padding-bottom: 12px; margin-bottom: 20px; color: #222; }}
+        #content h2 {{ font-size: 22px; margin-top: 36px; margin-bottom: 16px; color: #333; border-bottom: 1px solid var(--border); padding-bottom: 8px; }}
+        #content h3 {{ font-size: 18px; margin-top: 28px; margin-bottom: 12px; color: #444; }}
+        #content p {{ margin-bottom: 14px; }}
+        #content strong {{ color: #222; }}
+        #content a {{ color: var(--accent); text-decoration: none; }}
+        #content a:hover {{ text-decoration: underline; }}
+        #content code {{ background: var(--code-bg); padding: 2px 6px; border-radius: 3px; font-family: "SF Mono", "Fira Code", "Consolas", monospace; font-size: 13px; }}
+        #content pre {{ background: #2d2d2d; color: #f8f8f2; padding: 16px 20px; border-radius: 6px; overflow-x: auto; margin: 16px 0; font-size: 13px; line-height: 1.5; }}
+        #content pre code {{ background: none; padding: 0; color: inherit; }}
+        #content table {{ width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }}
+        #content th, #content td {{ border: 1px solid var(--border); padding: 10px 14px; text-align: left; }}
+        #content th {{ background: #f0f5fb; font-weight: 600; color: #333; }}
+        #content tr:nth-child(even) td {{ background: var(--table-stripe); }}
+        #content img {{ max-width: 100%; height: auto; display: block; margin: 16px auto; border-radius: 4px; }}
+        #content hr {{ border: none; border-top: 1px solid var(--border); margin: 28px 0; }}
+        #content blockquote {{ border-left: 4px solid var(--accent); padding: 8px 16px; margin: 16px 0; background: #f8fafc; color: var(--text-secondary); border-radius: 0 4px 4px 0; }}
+        #content ul, #content ol {{ margin: 12px 0 12px 24px; }}
+        #content li {{ margin-bottom: 6px; }}
 
-        .loading, .error { text-align: center; padding: 60px 20px; color: var(--text-secondary); }
-        .error { color: #c0392b; }
-        .footer { text-align: center; padding: 20px; color: #999; font-size: 12px; }
+        .footer {{ text-align: center; padding: 20px; color: #999; font-size: 12px; }}
 
-        @media (max-width: 768px) {
-            .topbar { padding: 0 12px; }
-            .topbar .brand { font-size: 14px; }
-            .topbar .lang-wrap label { display: none; }
-            #content { padding: 24px 20px; }
-            .container { padding: 72px 12px 40px; }
-        }
+        @media (max-width: 768px) {{
+            .topbar {{ padding: 0 12px; }}
+            .topbar .brand {{ font-size: 14px; }}
+            .topbar .lang-wrap label {{ display: none; }}
+            #content {{ padding: 24px 20px; }}
+            .container {{ padding: 72px 12px 40px; }}
+        }}
     </style>
 </head>
 <body>
@@ -599,9 +609,7 @@ def generate_main_index_html():
 </div>
 
 <div class="container">
-    <div id="content">
-        <div class="loading">Loading documentation...</div>
-    </div>
+    <div id="content"></div>
 </div>
 
 <div class="footer">
@@ -609,55 +617,28 @@ def generate_main_index_html():
 </div>
 
 <script>
-    var LANG_LABELS = { en: 'English', cn: 'Simplified Chinese', tw: 'Traditional Chinese' };
+    var CONTENTS = {{
+        en: `{index_contents['en']}`,
+        cn: `{index_contents['cn']}`,
+        tw: `{index_contents['tw']}`
+    }};
+    var LANG_LABELS = {{ en: 'English', cn: 'Simplified Chinese', tw: 'Traditional Chinese' }};
     var currentLang = 'en';
 
-    function switchLang(lang) {
+    function switchLang(lang) {{
         if (lang === currentLang) return;
         currentLang = lang;
         document.getElementById('langSelect').value = lang;
         document.title = 'IRQ Simulator - Documentation (' + LANG_LABELS[lang] + ')';
-        loadContent(lang);
-    }
+        renderContent(lang);
+    }}
 
-    function loadContent(lang) {
-        var contentEl = document.getElementById('content');
-        contentEl.innerHTML = '<div class="loading">Loading documentation...</div>';
+    function renderContent(lang) {{
+        marked.setOptions({{ breaks: false, gfm: true }});
+        document.getElementById('content').innerHTML = marked.parse(CONTENTS[lang]);
+    }}
 
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', 'index_' + lang + '.md', true);
-        xhr.overrideMimeType('text/plain; charset=utf-8');
-        xhr.onload = function() {
-            if (xhr.status >= 200 && xhr.status < 300) {
-                var markdown = xhr.responseText;
-                marked.setOptions({ breaks: false, gfm: true });
-                var html = marked.parse(markdown);
-                contentEl.innerHTML = html;
-                document.title = 'IRQ Simulator - Documentation (' + LANG_LABELS[lang] + ')';
-            } else {
-                showError(lang, 'HTTP ' + xhr.status);
-            }
-        };
-        xhr.onerror = function() {
-            showError(lang, 'Network error (try serving via HTTP instead of file://)');
-        };
-        xhr.send();
-    }
-
-    function showError(lang, msg) {
-        var contentEl = document.getElementById('content');
-        contentEl.innerHTML =
-            '<div class="error">' +
-            '<p><strong>Failed to load documentation</strong></p>' +
-            '<p>Could not load <code>index_' + lang + '.md</code></p>' +
-            '<p style="font-size:13px;color:#999;">' + msg + '</p>' +
-            '<p style="margin-top:16px;">' +
-            '<a href="index_' + lang + '.md" style="color:#4A90D9;">' +
-            'Open raw Markdown file directly' +
-            '</a></p></div>';
-    }
-
-    function init() {
+    function init() {{
         var detected = 'en';
         var navLang = (navigator.language || navigator.userLanguage || '').toLowerCase();
         if (navLang.indexOf('zh-tw') === 0 || navLang.indexOf('zh-hk') === 0) detected = 'tw';
@@ -667,8 +648,8 @@ def generate_main_index_html():
         currentLang = detected;
         document.getElementById('langSelect').value = detected;
         document.title = 'IRQ Simulator - Documentation (' + LANG_LABELS[detected] + ')';
-        loadContent(detected);
-    }
+        renderContent(detected);
+    }}
 
     document.addEventListener('DOMContentLoaded', init);
 </script>
@@ -679,7 +660,6 @@ def generate_main_index_html():
     with open(html_path, "w", encoding="utf-8-sig") as f:
         f.write(html_content)
     return html_path
-
 
 # ==========================================
 # API 細節首頁 (software_design_detail_{lang}.html)
