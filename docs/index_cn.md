@@ -53,11 +53,11 @@ flowchart TB
 
 | ASPICE 阶段 | 文件夹 | 文件 | 语言版本 |
 |-------------|--------|------|----------|
-| **SWE.1** 软件需求分析 | 01_software_requirements | IRQ Simulator 需求规格 | [EN](01_software_requirements/requirement_en.html) \| [CN](01_software_requirements/requirement_cn.html) \| [TW](01_software_requirements/requirement_tw.html) |
-| **SWE.2** 软件架构设计 | 02_software_architecture | IRQ Simulator 软件架构 | [EN](02_software_architecture/software_architecture_en.html) \| [CN](02_software_architecture/software_architecture_cn.html) \| [TW](02_software_architecture/software_architecture_tw.html) |
-| **SWE.3** 软件详细设计 | 03_software_detailed_design | IRQ Simulator 软件设计 | [EN](03_software_detailed_design/software_design_en.html) \| [CN](03_software_detailed_design/software_design_cn.html) \| [TW](03_software_detailed_design/software_design_tw.html) |
-| **SWE.4** 软件单元验证 | 04_software_unit_verification | IRQ Simulator 单元测试计划 | [EN](04_software_unit_verification/unit_test_en.html) \| [CN](04_software_unit_verification/unit_test_cn.html) \| [TW](04_software_unit_verification/unit_test_tw.html) |
-| **SWE.5** 软件集成测试 | 05_software_integration_test | IRQ Simulator 集成测试计划 | [EN](05_software_integration_test/integrated_test_en.html) \| [CN](05_software_integration_test/integrated_test_cn.html) \| [TW](05_software_integration_test/integrated_test_tw.html) |
+| **SWE.1** 软件需求分析 | 01_software_requirements | IRQ Simulator 需求规格 | [EN](01_software_requirements/requirement_en.md) \| [CN](01_software_requirements/requirement_cn.md) \| [TW](01_software_requirements/requirement_tw.md) |
+| **SWE.2** 软件架构设计 | 02_software_architecture | IRQ Simulator 软件架构 | [EN](02_software_architecture/software_architecture_en.md) \| [CN](02_software_architecture/software_architecture_cn.md) \| [TW](02_software_architecture/software_architecture_tw.md) |
+| **SWE.3** 软件详细设计 | 03_software_detailed_design | IRQ Simulator 软件设计 | [EN](03_software_detailed_design/software_design_en.md) \| [CN](03_software_detailed_design/software_design_cn.md) \| [TW](03_software_detailed_design/software_design_tw.md) |
+| **SWE.4** 软件单元验证 | 04_software_unit_verification | IRQ Simulator 单元测试计划 | [EN](04_software_unit_verification/unit_test_en.md) \| [CN](04_software_unit_verification/unit_test_cn.md) \| [TW](04_software_unit_verification/unit_test_tw.md) |
+| **SWE.5** 软件集成测试 | 05_software_integration_test | IRQ Simulator 集成测试计划 | [EN](05_software_integration_test/integrated_test_en.md) \| [CN](05_software_integration_test/integrated_test_cn.md) \| [TW](05_software_integration_test/integrated_test_tw.md) |
 
 ---
 
