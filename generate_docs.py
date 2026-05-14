@@ -2,58 +2,50 @@
 import os
 import re
 import subprocess
-import base64
 from datetime import datetime
 from pathlib import Path
 
 # ==========================================
-# Mermaid SVG 轉換核心引擎
+# Mermaid 轉換核心引擎 (PNG 實體點陣圖版)
 # ==========================================
 def create_puppeteer_config():
-    """建立 Puppeteer 設定檔，解決 Docker root 權限下無法執行 Chrome 的問題"""
+    """建立 Puppeteer 設定檔，解決 Docker root 權限問題"""
     config_path = "puppeteer-config.json"
     if not os.path.exists(config_path):
         with open(config_path, "w", encoding="utf-8") as f:
             f.write('{"args": ["--no-sandbox", "--disable-setuid-sandbox"]}')
     return config_path
 
-def render_mermaid_to_svg(mermaid_code, out_svg_path):
-    """呼叫 mermaid-cli 將原始碼轉為 SVG 實體圖片"""
+def render_mermaid_to_png(mermaid_code, out_png_path):
+    """呼叫 mermaid-cli 將原始碼轉為實體 PNG 圖片"""
     config_path = create_puppeteer_config()
-    mmd_filename = out_svg_path.replace(".svg", ".mmd")
+    mmd_filename = out_png_path.replace(".png", ".mmd")
     
-    # 寫入暫存的 .mmd 檔案
     with open(mmd_filename, "w", encoding="utf-8") as f:
         f.write(mermaid_code)
 
     try:
-        # 呼叫系統的 mmdc 進行無頭轉換 (改用 white 背景避免 PDF 渲染成透明或黑框)
+        # 強制轉為 PNG，設定白底，並將解析度放大 2 倍 (-s 2) 以適應 PDF 列印需求
         subprocess.run([
             "mmdc",
             "-i", mmd_filename,
-            "-o", out_svg_path,
+            "-o", out_png_path,
             "-p", config_path,
-            "-b", "white" 
+            "-b", "white",
+            "-s", "2"
         ], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         return True
     except subprocess.CalledProcessError as e:
-        print(f"      [警告] Mermaid 轉換失敗 ({out_svg_path}): {e.stderr.decode('utf-8', errors='ignore')}")
+        print(f"      [警告] Mermaid 轉換失敗 ({out_png_path}): {e.stderr.decode('utf-8', errors='ignore')}")
         return False
     finally:
         if os.path.exists(mmd_filename):
             os.remove(mmd_filename)
 
-def get_base64_image_md(filepath, alt_text):
-    """將實體 SVG 圖片讀取並轉換為 Base64 Markdown 語法，徹底解決 PDF 延遲載入空白問題"""
-    with open(filepath, "rb") as f:
-        encoded_string = base64.b64encode(f.read()).decode('utf-8')
-    return f"![{alt_text}](data:image/svg+xml;base64,{encoded_string})"
-
 # ==========================================
 # 專案原始碼解析
 # ==========================================
 def find_all_source_files():
-    """自動搜尋專案內所有 .c 和 .h 檔案"""
     source_files = []
     for filepath in Path(".").rglob("*.[ch]"):
         path_str = str(filepath)
@@ -62,7 +54,6 @@ def find_all_source_files():
     return sorted(source_files)
 
 def parse_file(filepath):
-    """解析 C/H 檔案，提取函式註解與定義"""
     if not os.path.exists(filepath):
         return []
     
@@ -140,15 +131,14 @@ def generate_mermaid_arch():
     C -.->|設定| J
 """
     os.makedirs("docs/assets", exist_ok=True)
-    svg_path = "docs/assets/arch.svg"
+    png_path = "docs/assets/arch.png"
     
-    if render_mermaid_to_svg(code, svg_path):
-        # 轉換成功，直接將圖片編碼成 Base64 塞入 Markdown
-        return get_base64_image_md(svg_path, "模組架構圖")
+    # 產生物理 PNG 檔案
+    if render_mermaid_to_png(code, png_path):
+        # 回傳標準 Markdown 圖片語法 (使用相對路徑)
+        return "![模組架構圖](assets/arch.png)"
     else:
-        # 轉換失敗，退回原始碼顯示
-        return f"""```mermaid
-{code}
+        return f"""```mermaid\n{code}\n
 ```"""
 
 def generate_function_flow_diagram(func_name, save_dir):
@@ -176,17 +166,14 @@ def generate_function_flow_diagram(func_name, save_dir):
         return ""
 
     code = diagrams[func_name]
-    svg_name = f"flow_{func_name}.svg"
-    svg_full_path = os.path.join(save_dir, svg_name)
+    png_name = f"flow_{func_name}.png"
+    png_full_path = os.path.join(save_dir, png_name)
     
-    if render_mermaid_to_svg(code, svg_full_path):
-        # 轉換成功，直接將圖片編碼成 Base64 塞入 Markdown
-        return get_base64_image_md(svg_full_path, f"{func_name} 執行流程圖")
+    # 產生物理 PNG 檔案，放在跟 Markdown 檔案同一個資料夾
+    if render_mermaid_to_png(code, png_full_path):
+        return f"![{func_name} 執行流程圖]({png_name})"
     else:
-        # 轉換失敗，退回原始碼顯示
-        return f"""```mermaid
-{code}
-```"""
+        return f"""```mermaid\n{code}\n```"""
 
 def generate_index_md(total_files, total_funcs):
     content = f"""# TRAE 測試專案文件
@@ -257,14 +244,14 @@ def generate_file_md(filepath, funcs):
 
 def main():
     print("=" * 60)
-    print("TRAE 專案自動文件產生器 (Base64 圖片鑲嵌版)")
+    print("TRAE 專案自動文件產生器 (實體高畫質 PNG 終極版)")
     print("=" * 60)
     
     print("\n[1/4] 正在搜尋所有 .c 和 .h 檔案...")
     source_files = find_all_source_files()
     print(f"      找到 {len(source_files)} 個原始碼檔案")
     
-    print("\n[2/4] 正在解析原始碼並呼叫 mmdc 渲染圖表...")
+    print("\n[2/4] 正在解析原始碼並呼叫 mmdc 渲染實體圖表...")
     all_funcs_count = 0
     nav_entries = []
     
@@ -280,7 +267,7 @@ def main():
             f.write(md_content)
             
         nav_entries.append(f"      - '{src_file}': {md_rel_path}")
-        print(f"      ✓ 處理完成: {src_file} ({len(funcs)} 個函式，圖表已轉換為 Base64 嵌入)")
+        print(f"      ✓ 處理完成: {src_file} ({len(funcs)} 個函式，PNG 已產出)")
 
     print("\n[3/4] 正在產生首頁...")
     index_md = generate_index_md(len(source_files), all_funcs_count)
@@ -294,7 +281,6 @@ def main():
 site_description: Documentation for the TRAE test project
 site_author: Steven.Yang
 
-# 雙模式配置 (符合您之前的設定習慣)
 theme:
   name: material
   features:
@@ -332,7 +318,7 @@ nav:
     print("      ✓ 已產生 mkdocs.yml")
     
     print("\n" + "=" * 60)
-    print("文件產生完成！所有圖片皆已採用 Base64 絕對鑲嵌，不再受到 PDF 延遲載入影響。")
+    print("文件產生完成！所有圖表均已轉為實體高畫質 PNG 檔案。")
     print("=" * 60)
 
 if __name__ == "__main__":
