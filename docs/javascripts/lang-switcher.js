@@ -1,38 +1,37 @@
 (function() {
     var LANGS = {
-        'en': { label: 'English', suffix: '_en' },
-        'cn': { label: '简体中文', suffix: '_cn' },
-        'tw': { label: '繁體中文', suffix: '_tw' }
+        'en': { label: 'English' },
+        'cn': { label: '简体中文' },
+        'tw': { label: '繁體中文' }
     };
 
-    // 從 URL 偵測當前語系
     function detectLang(path) {
         if (/_cn\.html$/.test(path) || /_cn\/$/.test(path)) return 'cn';
         if (/_tw\.html$/.test(path) || /_tw\/$/.test(path)) return 'tw';
         return 'en';
     }
 
-    // 剝離語系後綴，得到基礎路徑
-    function getBasePath(path, lang) {
-        if (lang === 'en') {
-            return path.replace('_en', '');
-        }
-        return path.replace('_' + lang, '');
-    }
+    function switchTo(path, targetLang) {
+        // 檢查 URL 是否已有語系後綴 (_en / _cn / _tw)
+        var hasSuffix = /_(en|cn|tw)(?=\.html|\/|$)/.test(path);
 
-    // 根據目標語系組合完整路徑
-    function getTargetPath(basePath, targetLang) {
-        if (targetLang === 'en') {
-            return basePath;
+        if (hasSuffix) {
+            if (targetLang === 'en') {
+                // 剝離後綴 → 英文
+                return path.replace(/_(en|cn|tw)(?=\.html|\/|$)/, '');
+            }
+            // 替換後綴
+            return path.replace(/_(en|cn|tw)(?=\.html|\/|$)/, '_' + targetLang);
         }
-        return basePath.replace(/\.html$/, '_' + targetLang + '.html')
-                       .replace(/\/$/, '_' + targetLang + '/');
+
+        // 無後綴（英文首頁 index.html）
+        if (targetLang === 'en') return path;
+        return path.replace(/(\.html|\/|)$/, '_' + targetLang + '$1');
     }
 
     function createSwitcher() {
         var path = window.location.pathname;
         var currentLang = detectLang(path);
-        var basePath = getBasePath(path, currentLang);
 
         var select = document.createElement('select');
         select.style.cssText =
@@ -40,7 +39,6 @@
             'border-radius:4px;font-size:13px;margin-left:12px;' +
             'background:var(--md-default-bg-color);color:var(--md-default-fg-color);cursor:pointer;';
 
-        // 當前語系（disabled, 顯示用）
         var cur = document.createElement('option');
         cur.value = '';
         cur.textContent = LANGS[currentLang].label;
@@ -48,11 +46,10 @@
         cur.disabled = true;
         select.appendChild(cur);
 
-        // 其他語系選項
         for (var key in LANGS) {
             if (key === currentLang) continue;
             var opt = document.createElement('option');
-            opt.value = getTargetPath(basePath, key);
+            opt.value = switchTo(path, key);
             opt.textContent = LANGS[key].label;
             select.appendChild(opt);
         }
