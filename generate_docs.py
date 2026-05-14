@@ -203,7 +203,6 @@ def generate_file_md(filepath, funcs):
     filename = os.path.basename(filepath)
     is_header_file = filepath.lower().endswith(".h")
     
-    # 檔案標題頁 (with-pdf 預設會為每個 .md 檔案開啟新的一頁)
     content = f"# {filename}\n\n**檔案路徑**: `{filepath}`\n\n---\n\n"
     
     if not funcs:
@@ -211,7 +210,6 @@ def generate_file_md(filepath, funcs):
         return content, md_full_path, md_rel_path
 
     for f in funcs:
-        # 【核心修正 1】: 每個 Function 之前插入換頁標籤
         content += "\n<div class=\"page-break\"></div>\n\n"
         content += f"### {f['name']}\n\n"
         
@@ -249,7 +247,7 @@ def generate_file_md(filepath, funcs):
 
 def main():
     print("=" * 60)
-    print("TRAE 專案自動文件產生器 (防圖片截斷 & 強制分頁版)")
+    print("TRAE 專案自動文件產生器 (黃金比例 150mm 高度版)")
     print("=" * 60)
     
     print("\n[1/5] 正在搜尋所有 .c 和 .h 檔案...")
@@ -279,7 +277,7 @@ def main():
     with open("docs/index.md", "w", encoding="utf-8") as f:
         f.write(index_md)
         
-    # 【核心修正 2】: 強化 PDF 引擎的 CSS 規則 (換頁與防截斷)
+    # 【核心修正】：高度下調至 150mm，保留空間給表格
     os.makedirs("docs/stylesheets", exist_ok=True)
     css_content = """/* PDF 列印模式專屬設定 */
 @media print {
@@ -292,12 +290,15 @@ def main():
         page-break-before: always !important;
         break-before: page !important;
     }
-    /* 防止圖片超出版面或被從中間切斷 */
+    /* 圖片高度限制在 150mm，保留空間給上方的標題與表格 */
     img {
         max-width: 100% !important;
-        height: auto !important;
+        max-height: 150mm !important; 
+        object-fit: contain !important; 
         page-break-inside: avoid !important;
         break-inside: avoid !important;
+        display: block;
+        margin: 0 auto; 
     }
     /* 防止表格被切斷 */
     table {
@@ -353,7 +354,7 @@ nav:
     print("      ✓ 已產生 mkdocs.yml")
     
     print("\n" + "=" * 60)
-    print("文件產生完成！已加入防切斷保護與獨立頁面設計。")
+    print("文件產生完成！排版留白空間已優化。")
     print("=" * 60)
 
 if __name__ == "__main__":
