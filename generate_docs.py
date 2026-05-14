@@ -46,7 +46,6 @@ def render_mermaid_to_png_base64(mermaid_code, alt_text):
         return f"![{alt_text}](data:image/png;base64,{encoded})"
     except subprocess.CalledProcessError as e:
         print(f"      [警告] Mermaid 轉換失敗: {e.stderr.decode('utf-8', errors='ignore')}")
-        # 【修正點】使用三引號徹底解決 f-string 與反引號衝突的 Syntax Error
         return f"""```mermaid
 {mermaid_code}
 ```"""
@@ -218,16 +217,31 @@ def generate_file_md(filepath, funcs):
     content += "## 函式詳細說明\n\n"
     for f in funcs:
         content += f"### {f['name']}\n\n"
-        content += f"**功能說明**: {f['brief']}\n\n"
+        
+        # --- 改為精美的 Markdown 表格排版 ---
+        content += "| 項目 | 說明 |\n"
+        content += "| :--- | :--- |\n"
+        
+        brief_text = f['brief'] if f['brief'] else "無特別說明"
+        content += f"| **功能說明** | {brief_text} |\n"
         
         if f['doc_params']:
-            content += "**參數說明**:\n"
-            for p in f['doc_params']:
-                content += f"- {p}\n"
-            content += "\n"
+            # 使用 <br> 與條列式符號，讓多行參數在表格內也能漂亮呈現
+            params_html = "<br>".join([f"• {p}" for p in f['doc_params']])
+            content += f"| **參數說明** | {params_html} |\n"
+        else:
+            content += "| **參數說明** | 無 |\n"
         
         if f['doc_retval']:
-            content += f"**回傳值**: {f['doc_retval']}\n\n"
+            content += f"| **回傳值** | {f['doc_retval']} |\n"
+        else:
+            content += "| **回傳值** | 無 (void) |\n"
+            
+        if f['remark']:
+            content += f"| **備註** | {f['remark']} |\n"
+            
+        content += "\n\n"
+        # ------------------------------------
         
         flow_diag = generate_function_flow_diagram(f['name'])
         if flow_diag:
@@ -240,7 +254,7 @@ def generate_file_md(filepath, funcs):
 
 def main():
     print("=" * 60)
-    print("TRAE 專案自動文件產生器 (Base64 PNG + with-pdf 排版完美版)")
+    print("TRAE 專案自動文件產生器 (精美表格排版版)")
     print("=" * 60)
     
     print("\n[1/4] 正在搜尋所有 .c 和 .h 檔案...")
@@ -263,7 +277,7 @@ def main():
             f.write(md_content)
             
         nav_entries.append(f"      - '{src_file}': {md_rel_path}")
-        print(f"      ✓ 處理完成: {src_file} ({len(funcs)} 個函式，圖表已嵌入 Base64)")
+        print(f"      ✓ 處理完成: {src_file} ({len(funcs)} 個函式)")
 
     print("\n[3/4] 正在產生首頁...")
     index_md = generate_index_md(len(source_files), all_funcs_count)
@@ -286,6 +300,7 @@ theme:
 
 markdown_extensions:
   - admonition
+  - tables
   - toc:
       permalink: true
 
@@ -305,10 +320,10 @@ nav:
 '''
     with open("mkdocs.yml", "w", encoding="utf-8") as f:
         f.write(mkdocs_content)
-    print("      ✓ 已產生 mkdocs.yml (改用 with-pdf，告別空白頁！)")
+    print("      ✓ 已產生 mkdocs.yml (加入了 markdown_extensions: tables 支援)")
     
     print("\n" + "=" * 60)
-    print("文件產生完成！所有圖片皆為 Base64 PNG，搭配 WeasyPrint 保證排版完美。")
+    print("文件產生完成！請享受全新的 API 表格排版體驗。")
     print("=" * 60)
 
 if __name__ == "__main__":
