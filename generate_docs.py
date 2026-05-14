@@ -458,7 +458,7 @@ def generate_file_md(filepath, funcs, lang):
 # 語系切換首頁 (index.html)
 # ==========================================
 def generate_index_html():
-    html_content = r"""<!DOCTYPE html>
+    html_content = """<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
@@ -749,78 +749,84 @@ def generate_index_html():
 </div>
 
 <script>
-    const LANG_LABELS = {
-        tw: '繁體中文',
-        cn: '简体中文',
-        en: 'English'
-    };
-
-    let currentLang = 'tw';
+    var LANG_LABELS = { tw: '繁體中文', cn: '简体中文', en: 'English' };
+    var currentLang = 'tw';
 
     function detectBrowserLang() {
-        const navLang = (navigator.language || navigator.userLanguage || '').toLowerCase();
-        if (navLang.startsWith('zh-tw') || navLang.startsWith('zh-hk')) return 'tw';
-        if (navLang.startsWith('zh-cn') || navLang.startsWith('zh-sg')) return 'cn';
-        if (navLang.startsWith('zh')) return 'tw';
-        if (navLang.startsWith('en')) return 'en';
+        var navLang = (navigator.language || navigator.userLanguage || '').toLowerCase();
+        if (navLang.indexOf('zh-tw') === 0 || navLang.indexOf('zh-hk') === 0) return 'tw';
+        if (navLang.indexOf('zh-cn') === 0 || navLang.indexOf('zh-sg') === 0) return 'cn';
+        if (navLang.indexOf('zh') === 0) return 'tw';
+        if (navLang.indexOf('en') === 0) return 'en';
         return 'tw';
     }
 
     function switchLang(lang) {
         if (lang === currentLang) return;
         currentLang = lang;
-
-        document.querySelectorAll('.lang-btn').forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.lang === lang);
-        });
-
-        document.title = `IRQ Simulator - API Reference (${LANG_LABELS[lang]})`;
+        var buttons = document.querySelectorAll('.lang-btn');
+        for (var i = 0; i < buttons.length; i++) {
+            var btn = buttons[i];
+            if (btn.getAttribute('data-lang') === lang) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        }
+        document.title = 'IRQ Simulator - API Reference (' + LANG_LABELS[lang] + ')';
         loadContent(lang);
     }
 
-    async function loadContent(lang) {
-        const contentEl = document.getElementById('content');
+    function loadContent(lang) {
+        var contentEl = document.getElementById('content');
         contentEl.innerHTML = '<div class="loading">Loading documentation...</div>';
 
-        try {
-            const response = await fetch(`index_${lang}.md`);
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            const markdown = await response.text();
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', 'index_' + lang + '.md', true);
+        xhr.overrideMimeType('text/plain; charset=utf-8');
+        xhr.onload = function() {
+            if (xhr.status >= 200 && xhr.status < 300) {
+                var markdown = xhr.responseText;
+                marked.setOptions({ breaks: false, gfm: true });
+                var html = marked.parse(markdown);
+                contentEl.innerHTML = html;
+                document.title = 'IRQ Simulator - API Reference (' + LANG_LABELS[lang] + ')';
+            } else {
+                showError(lang, 'HTTP ' + xhr.status);
+            }
+        };
+        xhr.onerror = function() {
+            showError(lang, 'Network error (try serving via HTTP instead of file://)');
+        };
+        xhr.send();
+    }
 
-            marked.setOptions({
-                breaks: false,
-                gfm: true,
-            });
-
-            const html = marked.parse(markdown);
-            contentEl.innerHTML = html;
-
-            document.title = `IRQ Simulator - API Reference (${LANG_LABELS[lang]})`;
-        } catch (err) {
-            contentEl.innerHTML = `
-                <div class="error">
-                    <p><strong>Failed to load documentation</strong></p>
-                    <p>Could not load <code>index_${lang}.md</code></p>
-                    <p style="font-size:13px;color:#999;">${err.message}</p>
-                    <p style="margin-top:16px;">
-                        <a href="index_${lang}.md" style="color:#4A90D9;">
-                            → Open raw Markdown file directly
-                        </a>
-                    </p>
-                </div>`;
-            console.error('Load error:', err);
-        }
+    function showError(lang, msg) {
+        var contentEl = document.getElementById('content');
+        contentEl.innerHTML =
+            '<div class="error">' +
+            '<p><strong>Failed to load documentation</strong></p>' +
+            '<p>Could not load <code>index_' + lang + '.md</code></p>' +
+            '<p style="font-size:13px;color:#999;">' + msg + '</p>' +
+            '<p style="margin-top:16px;">' +
+            '<a href="index_' + lang + '.md" style="color:#4A90D9;">' +
+            'Open raw Markdown file directly' +
+            '</a></p></div>';
     }
 
     function init() {
-        const detected = detectBrowserLang();
+        var detected = detectBrowserLang();
         currentLang = detected;
-
-        document.querySelectorAll('.lang-btn').forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.lang === detected);
-        });
-
-        document.title = `IRQ Simulator - API Reference (${LANG_LABELS[detected]})`;
+        var buttons = document.querySelectorAll('.lang-btn');
+        for (var i = 0; i < buttons.length; i++) {
+            var btn = buttons[i];
+            if (btn.getAttribute('data-lang') === detected) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        }
+        document.title = 'IRQ Simulator - API Reference (' + LANG_LABELS[detected] + ')';
         loadContent(detected);
     }
 
@@ -830,7 +836,7 @@ def generate_index_html():
 </body>
 </html>"""
     html_path = os.path.join(OUTPUT_BASE, "index.html")
-    with open(html_path, "w", encoding="utf-8") as f:
+    with open(html_path, "w", encoding="utf-8-sig") as f:
         f.write(html_content)
     return html_path
 
