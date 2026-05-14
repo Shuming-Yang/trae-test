@@ -12,21 +12,24 @@
     }
 
     function switchTo(path, targetLang) {
-        // 檢查 URL 是否已有語系後綴 (_en / _cn / _tw)
         var hasSuffix = /_(en|cn|tw)(?=\.html|\/|$)/.test(path);
 
         if (hasSuffix) {
             if (targetLang === 'en') {
-                // 剝離後綴 → 英文
                 return path.replace(/_(en|cn|tw)(?=\.html|\/|$)/, '');
             }
-            // 替換後綴
             return path.replace(/_(en|cn|tw)(?=\.html|\/|$)/, '_' + targetLang);
         }
 
-        // 無後綴（英文首頁 index.html）
+        // 無後綴 = 英文頁面
         if (targetLang === 'en') return path;
-        return path.replace(/(\.html|\/|)$/, '_' + targetLang + '$1');
+
+        // 英文首頁特殊處理: /trae-test/ → /trae-test/index_cn/
+        if (path === '/' || /\/$/.test(path) || /\/index\.html$/.test(path)) {
+            return path.replace(/(\/?)(index\.html)?$/, '/index_' + targetLang + '/');
+        }
+
+        return path.replace(/(\.html)$/, '_' + targetLang + '.html');
     }
 
     function createSwitcher() {
