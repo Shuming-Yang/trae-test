@@ -12,24 +12,23 @@
     }
 
     function switchTo(path, targetLang) {
-        var hasSuffix = /_(en|cn|tw)(?=\.html|\/|$)/.test(path);
+        // 判斷是否為首頁（index_xx 或純 /）
+        var isIndex = /\/index(_(en|cn|tw))?(\.html|\/|$)/.test(path) ||
+                    /\/$/.test(path) && !/_(en|cn|tw)\//.test(path);
 
-        if (hasSuffix) {
+        if (isIndex) {
+            // 首頁規則
             if (targetLang === 'en') {
-                return path.replace(/_(en|cn|tw)(?=\.html|\/|$)/, '');
+                return path.replace(/\/index(_(en|cn|tw))?(\/|\.html)?$/, '/');
             }
-            return path.replace(/_(en|cn|tw)(?=\.html|\/|$)/, '_' + targetLang);
+            return path.replace(/(\/index(_(en|cn|tw))?)?(\/|\.html)?$/, '/index_' + targetLang + '/');
         }
 
-        // 無後綴 = 英文頁面
-        if (targetLang === 'en') return path;
-
-        // 英文首頁特殊處理: /trae-test/ → /trae-test/index_cn/
-        if (path === '/' || /\/$/.test(path) || /\/index\.html$/.test(path)) {
-            return path.replace(/(\/?)(index\.html)?$/, '/index_' + targetLang + '/');
+        // 子頁規則：一律有 _xx 後綴
+        if (targetLang === 'en') {
+            return path.replace(/_(cn|tw)(?=\.html|\/|$)/, '_en');
         }
-
-        return path.replace(/(\.html)$/, '_' + targetLang + '.html');
+        return path.replace(/_(en|cn|tw)(?=\.html|\/|$)/, '_' + targetLang);
     }
 
     function createSwitcher() {
