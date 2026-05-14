@@ -12,15 +12,14 @@ site_url: https://steven.yang.gitlab.io/trae-test/
 docs_dir: docs
 extra_css:
   - stylesheets/extra.css
+extra_javascript:
+  - javascripts/lang-switcher.js
 
 # ==========================================
 # Navigation (ASPICE V-Model)
 # ==========================================
 nav:
-  - Home: index_en.md
-  - Language:
-      - 简体中文: index_cn.md
-      - 繁體中文: index_tw.md
+  - Home: index.md
   - SWE.1 Software Requirements:
       - English: 01_software_requirements/requirement_en.md
       - 简体中文: 01_software_requirements/requirement_cn.md
