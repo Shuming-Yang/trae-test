@@ -1,0 +1,112 @@
+# ==========================================
+# Site Information
+# ==========================================
+site_name: IRQ Simulator - ASPICE Documentation
+site_description: ASPICE software development documentation for IRQ Simulator project
+site_author: Steven.Yang
+
+# ==========================================
+# Directory Configuration
+# ==========================================
+docs_dir: docs
+extra_css:
+  - stylesheets/extra.css
+
+# ==========================================
+# Navigation (ASPICE V-Model)
+# ==========================================
+nav:
+  - Home:
+      - English: index_en.md
+      - 简体中文: index_cn.md
+      - 繁體中文: index_tw.md
+  - SWE.1 Software Requirements:
+      - English: 01_software_requirements/requirement_en.md
+      - 简体中文: 01_software_requirements/requirement_cn.md
+      - 繁體中文: 01_software_requirements/requirement_tw.md
+  - SWE.2 Software Architecture:
+      - English: 02_software_architecture/software_architecture_en.md
+      - 简体中文: 02_software_architecture/software_architecture_cn.md
+      - 繁體中文: 02_software_architecture/software_architecture_tw.md
+  - SWE.3 Software Detailed Design:
+      - English: 03_software_detailed_design/software_design_en.md
+      - 简体中文: 03_software_detailed_design/software_design_cn.md
+      - 繁體中文: 03_software_detailed_design/software_design_tw.md
+      - API Reference (EN): 03_software_detailed_design/api/api_en.md
+      - API Reference (CN): 03_software_detailed_design/api/api_cn.md
+      - API Reference (TW): 03_software_detailed_design/api/api_tw.md
+  - SWE.4 Software Unit Verification:
+      - English: 04_software_unit_verification/unit_test_en.md
+      - 简体中文: 04_software_unit_verification/unit_test_cn.md
+      - 繁體中文: 04_software_unit_verification/unit_test_tw.md
+  - SWE.5 Software Integration Test:
+      - English: 05_software_integration_test/integrated_test_en.md
+      - 简体中文: 05_software_integration_test/integrated_test_cn.md
+      - 繁體中文: 05_software_integration_test/integrated_test_tw.md
+
+# ==========================================
+# Theme: Material
+# ==========================================
+theme:
+  name: material
+  language: en
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - navigation.tracking
+    - content.code.copy
+    - search.suggest
+    - search.highlight
+
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: teal
+      accent: cyan
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: teal
+      accent: cyan
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+# ==========================================
+# Plugins
+# ==========================================
+plugins:
+  - search
+  - glightbox
+  - include-markdown
+  - with-pdf:
+      output_path: IRQ_Simulator_ASPICE_Documentation.pdf
+      cover_subtitle: "ASPICE Software Development Documentation"
+      author: OmniVision Technologies
+      copyright: Copyright © 2026 OmniVision Technologies, Inc. All rights reserved.
+
+# ==========================================
+# Markdown Extensions
+# ==========================================
+markdown_extensions:
+  - admonition
+  - tables
+  - attr_list
+  - md_in_html
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true

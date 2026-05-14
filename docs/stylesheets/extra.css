@@ -1,0 +1,52 @@
+/* ==========================================
+ * 共用設定 (若有跨主題都適用的 CSS 可放這裡)
+ * ========================================== */
+
+/* (目前暫無共用設定) */
+
+/* ==========================================
+ * Material 主題專屬 CSS (.md- 開頭)
+ * ========================================== */
+
+/* 讓整體容器寬度達到 100% (不限制在預設寬度) */
+.md-grid {
+    max-width: 100%;
+}
+
+/* 調整左側導覽列 (Side Nav) 為 25% */
+.md-sidebar--primary {
+    width: 25%;
+}
+
+/* 調整主內容區域為 75% */
+.md-content {
+    width: 75%;
+}
+
+/* 移除右側目錄 (Table of Contents) 的固定寬度，讓它與內容共存或隱藏 */
+/* 如果你希望內容頁面真的佔滿 75%，建議把右側 TOC 改為隨內容寬度變動 */
+.md-sidebar--secondary {
+    display: none;
+}
+
+/* ==========================================
+ * ReadTheDocs 主題專屬 CSS (.wy- 開頭)
+ * ========================================== */
+
+/* 將最大寬度放寬到 1600px (可依需求調整數字) */
+.wy-nav-content {
+    max-width: 1600px !important;
+}
+
+/* 讓表格在畫面中水平置中對齊 */
+.wy-table-responsive table {
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+/* 表格內的文字垂直/水平對齊更整齊 */
+.wy-table-responsive table th,
+.wy-table-responsive table td {
+    text-align: center !important;
+    vertical-align: middle !important;
+}
