@@ -11,7 +11,6 @@ from pathlib import Path
 # Mermaid 轉換核心引擎 (PNG 轉 Base64)
 # ==========================================
 def create_puppeteer_config():
-    """建立 Puppeteer 設定檔，解決 Docker root 權限問題"""
     config_path = "puppeteer-config.json"
     if not os.path.exists(config_path):
         with open(config_path, "w", encoding="utf-8") as f:
@@ -19,7 +18,6 @@ def create_puppeteer_config():
     return config_path
 
 def render_mermaid_to_png_base64(mermaid_code, alt_text):
-    """將 Mermaid 轉為實體 PNG，再編碼為 Base64 字串回傳"""
     config_path = create_puppeteer_config()
     unique_id = uuid.uuid4().hex
     temp_mmd = f"temp_{unique_id}.mmd"
@@ -167,8 +165,6 @@ def generate_function_flow_diagram(func_name):
     return render_mermaid_to_png_base64(code, f"{func_name} 執行流程圖")
 
 def generate_index_md(total_files, total_funcs):
-    # 下載區塊改用 HTML 撰寫，並加上 class="no-print"
-    # 當外掛轉換 PDF 時，遇到這段會自動將其隱藏
     content = f"""# TRAE 測試專案文件
 
 **文件產生時間**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
@@ -205,17 +201,18 @@ def generate_file_md(filepath, funcs):
     os.makedirs(os.path.dirname(md_full_path), exist_ok=True)
     
     filename = os.path.basename(filepath)
-    # 判斷是否為 .h 檔案 (轉小寫比對確保安全)
     is_header_file = filepath.lower().endswith(".h")
     
+    # 檔案標題頁 (with-pdf 預設會為每個 .md 檔案開啟新的一頁)
     content = f"# {filename}\n\n**檔案路徑**: `{filepath}`\n\n---\n\n"
     
     if not funcs:
         content += "> *此檔案目前沒有解析到符合格式的函式註解。*\n"
         return content, md_full_path, md_rel_path
 
-    content += "## 函式詳細說明\n\n"
     for f in funcs:
+        # 【核心修正 1】: 每個 Function 之前插入換頁標籤
+        content += "\n<div class=\"page-break\"></div>\n\n"
         content += f"### {f['name']}\n\n"
         
         content += "| 項目 | 說明 |\n"
@@ -240,7 +237,6 @@ def generate_file_md(filepath, funcs):
             
         content += "\n\n"
         
-        # 【修正點】如果是 .h 檔案，強制不產生流程圖
         if not is_header_file:
             flow_diag = generate_function_flow_diagram(f['name'])
             if flow_diag:
@@ -253,7 +249,7 @@ def generate_file_md(filepath, funcs):
 
 def main():
     print("=" * 60)
-    print("TRAE 專案自動文件產生器 (.h檔隱藏圖表 & PDF隱藏下載區塊)")
+    print("TRAE 專案自動文件產生器 (防圖片截斷 & 強制分頁版)")
     print("=" * 60)
     
     print("\n[1/5] 正在搜尋所有 .c 和 .h 檔案...")
@@ -278,17 +274,35 @@ def main():
         nav_entries.append(f"      - '{src_file}': {md_rel_path}")
         print(f"      ✓ 處理完成: {src_file} ({len(funcs)} 個函式)")
 
-    print("\n[3/5] 正在產生首頁與自訂 CSS...")
+    print("\n[3/5] 正在產生首頁與列印專屬 CSS...")
     index_md = generate_index_md(len(source_files), all_funcs_count)
     with open("docs/index.md", "w", encoding="utf-8") as f:
         f.write(index_md)
         
-    # 自動產生用於隱藏 PDF 區塊的 CSS 樣式表
+    # 【核心修正 2】: 強化 PDF 引擎的 CSS 規則 (換頁與防截斷)
     os.makedirs("docs/stylesheets", exist_ok=True)
-    css_content = """/* 網頁上正常顯示，但在列印或轉換 PDF 時強制隱藏 */
+    css_content = """/* PDF 列印模式專屬設定 */
 @media print {
+    /* 隱藏不想印出的區塊 */
     .no-print {
         display: none !important;
+    }
+    /* 強制在新的一頁開始 */
+    .page-break {
+        page-break-before: always !important;
+        break-before: page !important;
+    }
+    /* 防止圖片超出版面或被從中間切斷 */
+    img {
+        max-width: 100% !important;
+        height: auto !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+    /* 防止表格被切斷 */
+    table {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
     }
 }
 """
@@ -309,13 +323,14 @@ theme:
     - navigation.sections
     - toc.integrate
 
-# 載入我們剛剛自動產生的 CSS
 extra_css:
   - stylesheets/extra.css
 
 markdown_extensions:
   - admonition
   - tables
+  - attr_list
+  - md_in_html
   - toc:
       permalink: true
 
@@ -338,7 +353,7 @@ nav:
     print("      ✓ 已產生 mkdocs.yml")
     
     print("\n" + "=" * 60)
-    print("文件產生完成！已完美配置 PDF/網頁雙棲的顯示邏輯。")
+    print("文件產生完成！已加入防切斷保護與獨立頁面設計。")
     print("=" * 60)
 
 if __name__ == "__main__":
