@@ -8,7 +8,7 @@ from datetime import datetime
 from pathlib import Path
 
 # ==========================================
-# Mermaid 轉換核心引擎 (PNG 轉 Base64 終極版)
+# Mermaid 轉換核心引擎 (PNG 轉 Base64)
 # ==========================================
 def create_puppeteer_config():
     """建立 Puppeteer 設定檔，解決 Docker root 權限問題"""
@@ -19,7 +19,7 @@ def create_puppeteer_config():
     return config_path
 
 def render_mermaid_to_png_base64(mermaid_code, alt_text):
-    """將 Mermaid 轉為實體 PNG，再編碼為 Base64 字串回傳，徹底解決路徑與排版問題"""
+    """將 Mermaid 轉為實體 PNG，再編碼為 Base64 字串回傳"""
     config_path = create_puppeteer_config()
     unique_id = uuid.uuid4().hex
     temp_mmd = f"temp_{unique_id}.mmd"
@@ -29,7 +29,6 @@ def render_mermaid_to_png_base64(mermaid_code, alt_text):
         f.write(mermaid_code)
 
     try:
-        # 強制轉為 PNG，設定白底，並將解析度放大 2 倍 (-s 2)
         subprocess.run([
             "mmdc",
             "-i", temp_mmd,
@@ -39,7 +38,6 @@ def render_mermaid_to_png_base64(mermaid_code, alt_text):
             "-s", "2"
         ], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         
-        # 讀取 PNG 並轉為 Base64
         with open(temp_png, "rb") as f:
             encoded = base64.b64encode(f.read()).decode('utf-8')
         
@@ -50,7 +48,6 @@ def render_mermaid_to_png_base64(mermaid_code, alt_text):
 {mermaid_code}
 ```"""
     finally:
-        # 刪除暫存檔案，不留痕跡
         if os.path.exists(temp_mmd): os.remove(temp_mmd)
         if os.path.exists(temp_png): os.remove(temp_png)
 
@@ -126,7 +123,6 @@ def parse_file(filepath):
 # Markdown 與圖表生成
 # ==========================================
 def generate_mermaid_arch():
-    """產生系統架構圖"""
     code = """graph TD
     A[start.s<br/>重置入口] --> B[_except_reset]
     B --> C[main.c<br/>main 函式]
@@ -145,7 +141,6 @@ def generate_mermaid_arch():
     return render_mermaid_to_png_base64(code, "模組架構圖")
 
 def generate_function_flow_diagram(func_name):
-    """產生函式流程圖"""
     diagrams = {
         "main": """flowchart TD
     Start([開始]) --> Init[初始化中斷處理器指標]
@@ -172,6 +167,8 @@ def generate_function_flow_diagram(func_name):
     return render_mermaid_to_png_base64(code, f"{func_name} 執行流程圖")
 
 def generate_index_md(total_files, total_funcs):
+    # 下載區塊改用 HTML 撰寫，並加上 class="no-print"
+    # 當外掛轉換 PDF 時，遇到這段會自動將其隱藏
     content = f"""# TRAE 測試專案文件
 
 **文件產生時間**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
@@ -191,13 +188,13 @@ def generate_index_md(total_files, total_funcs):
 
 ---
 
-## 檔案下載
+<div class="no-print">
+<h2>檔案下載</h2>
+<h3>📄 PDF 文件 (包含完整架構與原始碼說明)</h3>
+<p><a href="trae_test_documentation.pdf">📥 下載完整說明文件 (PDF)</a></p>
+<hr>
+</div>
 
-### 📄 PDF 文件 (包含完整架構與原始碼說明)
-
-[📥 下載完整說明文件 (PDF)](trae_test_documentation.pdf)
-
----
 *本文件由 GitLab CI 自動掃描原始碼並產生*
 """
     return content
@@ -208,6 +205,9 @@ def generate_file_md(filepath, funcs):
     os.makedirs(os.path.dirname(md_full_path), exist_ok=True)
     
     filename = os.path.basename(filepath)
+    # 判斷是否為 .h 檔案 (轉小寫比對確保安全)
+    is_header_file = filepath.lower().endswith(".h")
+    
     content = f"# {filename}\n\n**檔案路徑**: `{filepath}`\n\n---\n\n"
     
     if not funcs:
@@ -218,7 +218,6 @@ def generate_file_md(filepath, funcs):
     for f in funcs:
         content += f"### {f['name']}\n\n"
         
-        # --- 改為精美的 Markdown 表格排版 ---
         content += "| 項目 | 說明 |\n"
         content += "| :--- | :--- |\n"
         
@@ -226,7 +225,6 @@ def generate_file_md(filepath, funcs):
         content += f"| **功能說明** | {brief_text} |\n"
         
         if f['doc_params']:
-            # 使用 <br> 與條列式符號，讓多行參數在表格內也能漂亮呈現
             params_html = "<br>".join([f"• {p}" for p in f['doc_params']])
             content += f"| **參數說明** | {params_html} |\n"
         else:
@@ -241,12 +239,13 @@ def generate_file_md(filepath, funcs):
             content += f"| **備註** | {f['remark']} |\n"
             
         content += "\n\n"
-        # ------------------------------------
         
-        flow_diag = generate_function_flow_diagram(f['name'])
-        if flow_diag:
-            content += "**執行流程圖**:\n\n"
-            content += flow_diag + "\n\n"
+        # 【修正點】如果是 .h 檔案，強制不產生流程圖
+        if not is_header_file:
+            flow_diag = generate_function_flow_diagram(f['name'])
+            if flow_diag:
+                content += "**執行流程圖**:\n\n"
+                content += flow_diag + "\n\n"
             
         content += "---\n\n"
         
@@ -254,14 +253,14 @@ def generate_file_md(filepath, funcs):
 
 def main():
     print("=" * 60)
-    print("TRAE 專案自動文件產生器 (精美表格排版版)")
+    print("TRAE 專案自動文件產生器 (.h檔隱藏圖表 & PDF隱藏下載區塊)")
     print("=" * 60)
     
-    print("\n[1/4] 正在搜尋所有 .c 和 .h 檔案...")
+    print("\n[1/5] 正在搜尋所有 .c 和 .h 檔案...")
     source_files = find_all_source_files()
     print(f"      找到 {len(source_files)} 個原始碼檔案")
     
-    print("\n[2/4] 正在解析原始碼並呼叫 mmdc 渲染 Base64 實體圖表...")
+    print("\n[2/5] 正在解析原始碼並呼叫 mmdc 渲染圖表...")
     all_funcs_count = 0
     nav_entries = []
     
@@ -279,12 +278,24 @@ def main():
         nav_entries.append(f"      - '{src_file}': {md_rel_path}")
         print(f"      ✓ 處理完成: {src_file} ({len(funcs)} 個函式)")
 
-    print("\n[3/4] 正在產生首頁...")
+    print("\n[3/5] 正在產生首頁與自訂 CSS...")
     index_md = generate_index_md(len(source_files), all_funcs_count)
     with open("docs/index.md", "w", encoding="utf-8") as f:
         f.write(index_md)
         
-    print("\n[4/4] 正在產生 mkdocs.yml...")
+    # 自動產生用於隱藏 PDF 區塊的 CSS 樣式表
+    os.makedirs("docs/stylesheets", exist_ok=True)
+    css_content = """/* 網頁上正常顯示，但在列印或轉換 PDF 時強制隱藏 */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+}
+"""
+    with open("docs/stylesheets/extra.css", "w", encoding="utf-8") as f:
+        f.write(css_content)
+
+    print("\n[4/5] 正在產生 mkdocs.yml...")
     nav_yaml_block = "\n".join(nav_entries)
     
     mkdocs_content = f'''site_name: TRAE Test Project Documentation
@@ -297,6 +308,10 @@ theme:
     - navigation.tabs
     - navigation.sections
     - toc.integrate
+
+# 載入我們剛剛自動產生的 CSS
+extra_css:
+  - stylesheets/extra.css
 
 markdown_extensions:
   - admonition
@@ -320,10 +335,10 @@ nav:
 '''
     with open("mkdocs.yml", "w", encoding="utf-8") as f:
         f.write(mkdocs_content)
-    print("      ✓ 已產生 mkdocs.yml (加入了 markdown_extensions: tables 支援)")
+    print("      ✓ 已產生 mkdocs.yml")
     
     print("\n" + "=" * 60)
-    print("文件產生完成！請享受全新的 API 表格排版體驗。")
+    print("文件產生完成！已完美配置 PDF/網頁雙棲的顯示邏輯。")
     print("=" * 60)
 
 if __name__ == "__main__":
