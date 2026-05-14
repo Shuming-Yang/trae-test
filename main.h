@@ -21,7 +21,12 @@ void tick_irq_handler(void);
 void exception_irq_handler(void);
 
 void irq_trigger(unsigned int irq_num);
+void irq_trigger_raw(uint32_t mask);
 void irq_handler(unsigned int irq_num);
 void irq_process_all(void);
+
+uint32_t irq_get_pending(void);
+unsigned int irq_get_tick(void);
+void irq_reset_all(void);
 
 #endif /* MAIN_H */

@@ -55,6 +55,16 @@ void irq_trigger(unsigned int irq_num) {
 }
 
 /**
+ * @brief Trigger multiple IRQs by raw mask (for h-mode / test use)
+ * @param [in] mask type=[uint32_t] R=[0-0xFFFFFFFF] P=[N/A] N=[N/A] D=[bitmask of IRQs to trigger]
+ * @retval type=[void] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
+ */
+void irq_trigger_raw(uint32_t mask) {
+    irq_pending |= mask;
+    TICK_PRINTF("[IRQ] Raw trigger: pending = 0x%08X\n", irq_pending);
+}
+
+/**
  * @brief IRQ handler: process a specific IRQ and clear its pending bit
  * @remark Test Criteria: IRQ handled and pending bit cleared.
  * @param [in] irq_num type=[unsigned int] R=[0-31] P=[0-31] N=[N/A] D=[IRQ number to handle]
@@ -195,12 +205,37 @@ void irq_process_all(void) {
 }
 
 /**
+ * @brief Get current IRQ pending register value (for test access)
+ * @retval type=[uint32_t] current irq_pending value
+ */
+uint32_t irq_get_pending(void) {
+    return irq_pending;
+}
+
+/**
+ * @brief Get current tick count value (for test access)
+ * @retval type=[unsigned int] current g_tick_count value
+ */
+unsigned int irq_get_tick(void) {
+    return g_tick_count;
+}
+
+/**
+ * @brief Reset all IRQ state to initial values (for test setup)
+ */
+void irq_reset_all(void) {
+    irq_pending = 0;
+    g_tick_count = 0;
+}
+
+/**
  * @brief Main entry point of the program
  * @remark Test Criteria: Program execution result.
  * @param [in] argc type=[int] R=[1-0x7fffffff] P=[Vail address] N=[0] D=[argument count]
  * @param [in] argv type=[char**] R=[Vail address] P=[Vail address] N=[NULL] D=[argument vector]
  * @retval type=[int] R=[0-0xff] P=[N/A] N=[N/A] D=[exit status]
  */
+#ifndef TEST_BUILD
 int main(int argc, char* argv[]) {
     char line[64];
     int input;
@@ -267,3 +302,4 @@ int main(int argc, char* argv[]) {
 
     return 0;
 }
+#endif /* TEST_BUILD */
