@@ -16,8 +16,8 @@ extra_css:
 # Navigation (ASPICE V-Model)
 # ==========================================
 nav:
-  - Home:
-      - English: index_en.md
+  - Home: index_en.md
+  - Language:
       - 简体中文: index_cn.md
       - 繁體中文: index_tw.md
   - SWE.1 Software Requirements:
