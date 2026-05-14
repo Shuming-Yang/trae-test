@@ -2,11 +2,13 @@
 import os
 import re
 import subprocess
+import base64
+import uuid
 from datetime import datetime
 from pathlib import Path
 
 # ==========================================
-# Mermaid 轉換核心引擎 (PNG 實體點陣圖版)
+# Mermaid 轉換核心引擎 (PNG 轉 Base64 終極版)
 # ==========================================
 def create_puppeteer_config():
     """建立 Puppeteer 設定檔，解決 Docker root 權限問題"""
@@ -16,31 +18,40 @@ def create_puppeteer_config():
             f.write('{"args": ["--no-sandbox", "--disable-setuid-sandbox"]}')
     return config_path
 
-def render_mermaid_to_png(mermaid_code, out_png_path):
-    """呼叫 mermaid-cli 將原始碼轉為實體 PNG 圖片"""
+def render_mermaid_to_png_base64(mermaid_code, alt_text):
+    """將 Mermaid 轉為實體 PNG，再編碼為 Base64 字串回傳，徹底解決路徑與排版問題"""
     config_path = create_puppeteer_config()
-    mmd_filename = out_png_path.replace(".png", ".mmd")
+    unique_id = uuid.uuid4().hex
+    temp_mmd = f"temp_{unique_id}.mmd"
+    temp_png = f"temp_{unique_id}.png"
     
-    with open(mmd_filename, "w", encoding="utf-8") as f:
+    with open(temp_mmd, "w", encoding="utf-8") as f:
         f.write(mermaid_code)
 
     try:
-        # 強制轉為 PNG，設定白底，並將解析度放大 2 倍 (-s 2) 以適應 PDF 列印需求
+        # 強制轉為 PNG，設定白底，並將解析度放大 2 倍 (-s 2)
         subprocess.run([
             "mmdc",
-            "-i", mmd_filename,
-            "-o", out_png_path,
+            "-i", temp_mmd,
+            "-o", temp_png,
             "-p", config_path,
             "-b", "white",
             "-s", "2"
         ], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        return True
+        
+        # 讀取 PNG 並轉為 Base64
+        with open(temp_png, "rb") as f:
+            encoded = base64.b64encode(f.read()).decode('utf-8')
+        
+        return f"![{alt_text}](data:image/png;base64,{encoded})"
     except subprocess.CalledProcessError as e:
-        print(f"      [警告] Mermaid 轉換失敗 ({out_png_path}): {e.stderr.decode('utf-8', errors='ignore')}")
-        return False
+        print(f"      [警告] Mermaid 轉換失敗: {e.stderr.decode('utf-8', errors='ignore')}")
+        return f"```mermaid\n{mermaid_code}\n
+```"
     finally:
-        if os.path.exists(mmd_filename):
-            os.remove(mmd_filename)
+        # 刪除暫存檔案，不留痕跡
+        if os.path.exists(temp_mmd): os.remove(temp_mmd)
+        if os.path.exists(temp_png): os.remove(temp_png)
 
 # ==========================================
 # 專案原始碼解析
@@ -130,18 +141,9 @@ def generate_mermaid_arch():
     C -.->|設定| G
     C -.->|設定| J
 """
-    os.makedirs("docs/assets", exist_ok=True)
-    png_path = "docs/assets/arch.png"
-    
-    # 產生物理 PNG 檔案
-    if render_mermaid_to_png(code, png_path):
-        # 回傳標準 Markdown 圖片語法 (使用相對路徑)
-        return "![模組架構圖](assets/arch.png)"
-    else:
-        return f"""```mermaid\n{code}\n
-```"""
+    return render_mermaid_to_png_base64(code, "模組架構圖")
 
-def generate_function_flow_diagram(func_name, save_dir):
+def generate_function_flow_diagram(func_name):
     """產生函式流程圖"""
     diagrams = {
         "main": """flowchart TD
@@ -166,14 +168,7 @@ def generate_function_flow_diagram(func_name, save_dir):
         return ""
 
     code = diagrams[func_name]
-    png_name = f"flow_{func_name}.png"
-    png_full_path = os.path.join(save_dir, png_name)
-    
-    # 產生物理 PNG 檔案，放在跟 Markdown 檔案同一個資料夾
-    if render_mermaid_to_png(code, png_full_path):
-        return f"![{func_name} 執行流程圖]({png_name})"
-    else:
-        return f"""```mermaid\n{code}\n```"""
+    return render_mermaid_to_png_base64(code, f"{func_name} 執行流程圖")
 
 def generate_index_md(total_files, total_funcs):
     content = f"""# TRAE 測試專案文件
@@ -209,8 +204,7 @@ def generate_index_md(total_files, total_funcs):
 def generate_file_md(filepath, funcs):
     md_rel_path = f"api/{filepath}.md".replace("\\", "/")
     md_full_path = os.path.join("docs", md_rel_path)
-    save_dir = os.path.dirname(md_full_path)
-    os.makedirs(save_dir, exist_ok=True)
+    os.makedirs(os.path.dirname(md_full_path), exist_ok=True)
     
     filename = os.path.basename(filepath)
     content = f"# {filename}\n\n**檔案路徑**: `{filepath}`\n\n---\n\n"
@@ -233,7 +227,7 @@ def generate_file_md(filepath, funcs):
         if f['doc_retval']:
             content += f"**回傳值**: {f['doc_retval']}\n\n"
         
-        flow_diag = generate_function_flow_diagram(f['name'], save_dir)
+        flow_diag = generate_function_flow_diagram(f['name'])
         if flow_diag:
             content += "**執行流程圖**:\n\n"
             content += flow_diag + "\n\n"
@@ -244,14 +238,14 @@ def generate_file_md(filepath, funcs):
 
 def main():
     print("=" * 60)
-    print("TRAE 專案自動文件產生器 (實體高畫質 PNG 終極版)")
+    print("TRAE 專案自動文件產生器 (Base64 PNG + with-pdf 排版完美版)")
     print("=" * 60)
     
     print("\n[1/4] 正在搜尋所有 .c 和 .h 檔案...")
     source_files = find_all_source_files()
     print(f"      找到 {len(source_files)} 個原始碼檔案")
     
-    print("\n[2/4] 正在解析原始碼並呼叫 mmdc 渲染實體圖表...")
+    print("\n[2/4] 正在解析原始碼並呼叫 mmdc 渲染 Base64 實體圖表...")
     all_funcs_count = 0
     nav_entries = []
     
@@ -267,7 +261,7 @@ def main():
             f.write(md_content)
             
         nav_entries.append(f"      - '{src_file}': {md_rel_path}")
-        print(f"      ✓ 處理完成: {src_file} ({len(funcs)} 個函式，PNG 已產出)")
+        print(f"      ✓ 處理完成: {src_file} ({len(funcs)} 個函式，圖表已嵌入 Base64)")
 
     print("\n[3/4] 正在產生首頁...")
     index_md = generate_index_md(len(source_files), all_funcs_count)
@@ -287,15 +281,6 @@ theme:
     - navigation.tabs
     - navigation.sections
     - toc.integrate
-  palette:
-    - scheme: default
-      toggle:
-        icon: material/toggle-switch-off-outline
-        name: Switch to dark mode
-    - scheme: slate
-      toggle:
-        icon: material/toggle-switch
-        name: Switch to light mode
 
 markdown_extensions:
   - admonition
@@ -304,9 +289,12 @@ markdown_extensions:
 
 plugins:
   - search
-  - pdf-export:
-      combined: true
-      combined_output_path: trae_test_documentation.pdf
+  - with-pdf:
+      output_path: trae_test_documentation.pdf
+      cover_title: "TRAE Test Project"
+      cover_subtitle: "System Architecture & API Reference"
+      author: "Steven.Yang"
+      toc_title: "目錄"
 
 nav:
   - 首頁: index.md
@@ -315,10 +303,10 @@ nav:
 '''
     with open("mkdocs.yml", "w", encoding="utf-8") as f:
         f.write(mkdocs_content)
-    print("      ✓ 已產生 mkdocs.yml")
+    print("      ✓ 已產生 mkdocs.yml (改用 with-pdf，告別空白頁！)")
     
     print("\n" + "=" * 60)
-    print("文件產生完成！所有圖表均已轉為實體高畫質 PNG 檔案。")
+    print("文件產生完成！所有圖片皆為 Base64 PNG，搭配 WeasyPrint 保證排版完美。")
     print("=" * 60)
 
 if __name__ == "__main__":
