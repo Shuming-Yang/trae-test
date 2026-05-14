@@ -64,7 +64,7 @@ flowchart TB
 ## Traceability Matrix
 
 ```mermaid
-flowchart LR
+flowchart TB
     subgraph REQ["SWE.1 Requirements"]
         FR01["FR-01: IRQ Trigger Mechanism"]
         FR02["FR-02: Input Modes"]

@@ -64,7 +64,7 @@ flowchart TB
 ## 追溯性矩阵 (Traceability Matrix)
 
 ```mermaid
-flowchart LR
+flowchart TB
     subgraph REQ["SWE.1 需求"]
         FR01["FR-01: IRQ 触发机制"]
         FR02["FR-02: 输入模式"]
