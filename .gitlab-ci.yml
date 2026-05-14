@@ -66,9 +66,6 @@ pages:
     - python3 generate_docs.py
     # 使用 mkdocs 建立 HTML，PDF 外掛會在背景自動生成整份文件的 PDF
     - mkdocs build --site-dir public
-    # 用自訂語系切換首頁覆蓋 mkdocs 預設首頁
-    - cp docs/03_software_detailed_design/api/index.html public/index.html
-    - cp docs/03_software_detailed_design/api/index_*.md public/
   artifacts:
     paths:
       - public
