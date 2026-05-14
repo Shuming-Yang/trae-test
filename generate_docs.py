@@ -46,8 +46,10 @@ def render_mermaid_to_png_base64(mermaid_code, alt_text):
         return f"![{alt_text}](data:image/png;base64,{encoded})"
     except subprocess.CalledProcessError as e:
         print(f"      [警告] Mermaid 轉換失敗: {e.stderr.decode('utf-8', errors='ignore')}")
-        return f"```mermaid\n{mermaid_code}\n
-```"
+        # 【修正點】使用三引號徹底解決 f-string 與反引號衝突的 Syntax Error
+        return f"""```mermaid
+{mermaid_code}
+```"""
     finally:
         # 刪除暫存檔案，不留痕跡
         if os.path.exists(temp_mmd): os.remove(temp_mmd)
