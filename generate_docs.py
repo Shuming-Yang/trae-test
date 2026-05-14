@@ -455,6 +455,387 @@ def generate_file_md(filepath, funcs, lang):
     return content, md_full_path, md_filename
 
 # ==========================================
+# 語系切換首頁 (index.html)
+# ==========================================
+def generate_index_html():
+    html_content = r"""<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IRQ Simulator - API Reference</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        :root {
+            --bg: #f5f5f5;
+            --card-bg: #ffffff;
+            --text: #333333;
+            --text-secondary: #666666;
+            --border: #e0e0e0;
+            --accent: #4A90D9;
+            --accent-hover: #357ABD;
+            --active-bg: #4A90D9;
+            --active-text: #ffffff;
+            --code-bg: #f0f0f0;
+            --table-stripe: #f9f9f9;
+            --shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            min-height: 100vh;
+        }
+
+        /* ── 頂部語系選擇列 ── */
+        .lang-bar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            padding: 10px 20px;
+        }
+
+        .lang-bar .brand {
+            font-weight: 700;
+            font-size: 15px;
+            color: var(--text);
+            margin-right: 24px;
+            white-space: nowrap;
+        }
+
+        .lang-btn {
+            padding: 8px 20px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--card-bg);
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .lang-btn:hover {
+            background: #e8f0fa;
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .lang-btn.active {
+            background: var(--active-bg);
+            color: var(--active-text);
+            border-color: var(--active-bg);
+        }
+
+        /* ── 主要內容區 ── */
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 32px 24px 64px;
+        }
+
+        #content {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 40px 48px;
+            box-shadow: var(--shadow);
+            min-height: 400px;
+        }
+
+        /* ── Markdown 渲染樣式 ── */
+        #content h1 {
+            font-size: 28px;
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 12px;
+            margin-bottom: 20px;
+            color: #222;
+        }
+
+        #content h2 {
+            font-size: 22px;
+            margin-top: 36px;
+            margin-bottom: 16px;
+            color: #333;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+        }
+
+        #content h3 {
+            font-size: 18px;
+            margin-top: 28px;
+            margin-bottom: 12px;
+            color: #444;
+        }
+
+        #content p {
+            margin-bottom: 14px;
+        }
+
+        #content strong {
+            color: #222;
+        }
+
+        #content a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        #content a:hover {
+            text-decoration: underline;
+        }
+
+        #content code {
+            background: var(--code-bg);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+            font-size: 13px;
+        }
+
+        #content pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 16px 20px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 16px 0;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        #content pre code {
+            background: none;
+            padding: 0;
+            color: inherit;
+        }
+
+        #content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: 14px;
+        }
+
+        #content th, #content td {
+            border: 1px solid var(--border);
+            padding: 10px 14px;
+            text-align: left;
+        }
+
+        #content th {
+            background: #f0f5fb;
+            font-weight: 600;
+            color: #333;
+        }
+
+        #content tr:nth-child(even) td {
+            background: var(--table-stripe);
+        }
+
+        #content img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 16px auto;
+            border-radius: 4px;
+        }
+
+        #content hr {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 28px 0;
+        }
+
+        #content blockquote {
+            border-left: 4px solid var(--accent);
+            padding: 8px 16px;
+            margin: 16px 0;
+            background: #f8fafc;
+            color: var(--text-secondary);
+            border-radius: 0 4px 4px 0;
+        }
+
+        #content ul, #content ol {
+            margin: 12px 0 12px 24px;
+        }
+
+        #content li {
+            margin-bottom: 6px;
+        }
+
+        /* ── 載入中 / 錯誤提示 ── */
+        .loading, .error {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .loading::before {
+            content: "⏳";
+            display: block;
+            font-size: 40px;
+            margin-bottom: 12px;
+        }
+
+        .error {
+            color: #c0392b;
+        }
+
+        /* ── 頁尾 ── */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #999;
+            font-size: 12px;
+        }
+
+        /* ── RWD ── */
+        @media (max-width: 768px) {
+            .lang-bar {
+                flex-wrap: wrap;
+                gap: 6px;
+                padding: 8px 12px;
+            }
+            .lang-bar .brand {
+                width: 100%;
+                text-align: center;
+                margin-right: 0;
+                margin-bottom: 4px;
+            }
+            .lang-btn {
+                padding: 6px 14px;
+                font-size: 13px;
+            }
+            #content {
+                padding: 24px 20px;
+            }
+            .container {
+                padding: 16px 12px 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ── 語系選擇列 ── -->
+<nav class="lang-bar">
+    <span class="brand">📘 IRQ Simulator API Reference</span>
+    <button class="lang-btn active" data-lang="tw" onclick="switchLang('tw')">繁體中文</button>
+    <button class="lang-btn" data-lang="cn" onclick="switchLang('cn')">简体中文</button>
+    <button class="lang-btn" data-lang="en" onclick="switchLang('en')">English</button>
+</nav>
+
+<!-- ── 內容區 ── -->
+<div class="container">
+    <div id="content">
+        <div class="loading">Loading documentation...</div>
+    </div>
+</div>
+
+<div class="footer">
+    Auto-generated by GitLab CI &mdash; ASPICE SWE.3 API Reference
+</div>
+
+<script>
+    const LANG_LABELS = {
+        tw: '繁體中文',
+        cn: '简体中文',
+        en: 'English'
+    };
+
+    let currentLang = 'tw';
+
+    function detectBrowserLang() {
+        const navLang = (navigator.language || navigator.userLanguage || '').toLowerCase();
+        if (navLang.startsWith('zh-tw') || navLang.startsWith('zh-hk')) return 'tw';
+        if (navLang.startsWith('zh-cn') || navLang.startsWith('zh-sg')) return 'cn';
+        if (navLang.startsWith('zh')) return 'tw';
+        if (navLang.startsWith('en')) return 'en';
+        return 'tw';
+    }
+
+    function switchLang(lang) {
+        if (lang === currentLang) return;
+        currentLang = lang;
+
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.lang === lang);
+        });
+
+        document.title = `IRQ Simulator - API Reference (${LANG_LABELS[lang]})`;
+        loadContent(lang);
+    }
+
+    async function loadContent(lang) {
+        const contentEl = document.getElementById('content');
+        contentEl.innerHTML = '<div class="loading">Loading documentation...</div>';
+
+        try {
+            const response = await fetch(`index_${lang}.md`);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const markdown = await response.text();
+
+            marked.setOptions({
+                breaks: false,
+                gfm: true,
+            });
+
+            const html = marked.parse(markdown);
+            contentEl.innerHTML = html;
+
+            document.title = `IRQ Simulator - API Reference (${LANG_LABELS[lang]})`;
+        } catch (err) {
+            contentEl.innerHTML = `
+                <div class="error">
+                    <p><strong>Failed to load documentation</strong></p>
+                    <p>Could not load <code>index_${lang}.md</code></p>
+                    <p style="font-size:13px;color:#999;">${err.message}</p>
+                    <p style="margin-top:16px;">
+                        <a href="index_${lang}.md" style="color:#4A90D9;">
+                            → Open raw Markdown file directly
+                        </a>
+                    </p>
+                </div>`;
+            console.error('Load error:', err);
+        }
+    }
+
+    function init() {
+        const detected = detectBrowserLang();
+        currentLang = detected;
+
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.lang === detected);
+        });
+
+        document.title = `IRQ Simulator - API Reference (${LANG_LABELS[detected]})`;
+        loadContent(detected);
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+</script>
+
+</body>
+</html>"""
+    html_path = os.path.join(OUTPUT_BASE, "index.html")
+    with open(html_path, "w", encoding="utf-8") as f:
+        f.write(html_content)
+    return html_path
+
+
+# ==========================================
 # 主程式
 # ==========================================
 def main():
@@ -493,6 +874,9 @@ def main():
         with open(index_path, "w", encoding="utf-8") as f:
             f.write(index_md)
         print(f"      ✓ index_{lang}.md ({t['nav_home']})")
+
+    html_path = generate_index_html()
+    print(f"      ✓ index.html (語系切換首頁)")
 
     css_dir = os.path.join("docs", "stylesheets")
     os.makedirs(css_dir, exist_ok=True)
