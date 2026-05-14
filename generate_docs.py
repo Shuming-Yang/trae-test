@@ -687,7 +687,7 @@ def generate_main_index_html():
 # ==========================================
 def generate_api_detail_html(lang):
     t = I18N[lang]
-    index_md_path = os.path.join(OUTPUT_BASE, f"index_{lang}.md")
+    index_md_path = os.path.join(OUTPUT_BASE, f"api_{lang}.md")
 
     markdown_content = ""
     if os.path.exists(index_md_path):
@@ -834,6 +834,206 @@ def generate_api_detail_html(lang):
         f.write(html_content)
     return html_path
 
+# ==========================================
+# 通用 Markdown → HTML 轉換器
+# 將任意 docs/ 下的 .md 轉為自給自足的 .html（內嵌內容，不需 XHR）
+# ==========================================
+def generate_page_html(md_content, lang, rel_path, filename):
+    t = I18N[lang]
+
+    escaped_md = md_content.replace("\\", "\\\\").replace("`", "\\`").replace("$", "\\$")
+
+    if rel_path == ".":
+        home_link = "index.html"
+    else:
+        depth = rel_path.count(os.sep) + 1
+        home_link = ("../" * depth) + "index.html"
+
+    lang_labels = {"en": "English", "cn": "Simplified Chinese", "tw": "Traditional Chinese"}
+    lang_label = lang_labels.get(lang, lang)
+
+    title = filename.replace(f"_{lang}.md", "").replace("_", " ").title()
+    first_heading = re.search(r'^#\s+(.+)$', md_content, re.MULTILINE)
+    if first_heading:
+        title = first_heading.group(1).strip()
+
+    html = f"""<!DOCTYPE html>
+<html lang="{lang}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{title}</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        :root {{
+            --bg: #f5f5f5;
+            --card-bg: #ffffff;
+            --text: #333333;
+            --text-secondary: #666666;
+            --border: #e0e0e0;
+            --accent: #4A90D9;
+            --code-bg: #f0f0f0;
+            --table-stripe: #f9f9f9;
+            --shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }}
+        * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+        body {{
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            min-height: 100vh;
+        }}
+        .topbar {{
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            height: 48px;
+        }}
+        .topbar .brand {{
+            font-weight: 700;
+            font-size: 15px;
+            color: #222;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 60%;
+        }}
+        .topbar .nav-right {{
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-shrink: 0;
+        }}
+        .topbar a {{
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 13px;
+            white-space: nowrap;
+        }}
+        .topbar a:hover {{ text-decoration: underline; }}
+        .lang-badge {{
+            font-size: 12px;
+            color: var(--text-secondary);
+            background: #f0f0f0;
+            padding: 4px 12px;
+            border-radius: 12px;
+            white-space: nowrap;
+        }}
+        .container {{
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 32px 24px 64px;
+        }}
+        #content {{
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 40px 48px;
+            box-shadow: var(--shadow);
+            min-height: 400px;
+        }}
+        #content h1 {{ font-size: 28px; border-bottom: 2px solid var(--accent); padding-bottom: 12px; margin-bottom: 20px; color: #222; }}
+        #content h2 {{ font-size: 22px; margin-top: 36px; margin-bottom: 16px; color: #333; border-bottom: 1px solid var(--border); padding-bottom: 8px; }}
+        #content h3 {{ font-size: 18px; margin-top: 28px; margin-bottom: 12px; color: #444; }}
+        #content p {{ margin-bottom: 14px; }}
+        #content strong {{ color: #222; }}
+        #content a {{ color: var(--accent); text-decoration: none; }}
+        #content a:hover {{ text-decoration: underline; }}
+        #content code {{ background: var(--code-bg); padding: 2px 6px; border-radius: 3px; font-family: "SF Mono", "Fira Code", "Consolas", monospace; font-size: 13px; }}
+        #content pre {{ background: #2d2d2d; color: #f8f8f2; padding: 16px 20px; border-radius: 6px; overflow-x: auto; margin: 16px 0; font-size: 13px; line-height: 1.5; }}
+        #content pre code {{ background: none; padding: 0; color: inherit; }}
+        #content table {{ width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }}
+        #content th, #content td {{ border: 1px solid var(--border); padding: 10px 14px; text-align: left; }}
+        #content th {{ background: #f0f5fb; font-weight: 600; color: #333; }}
+        #content tr:nth-child(even) td {{ background: var(--table-stripe); }}
+        #content img {{ max-width: 100%; height: auto; display: block; margin: 16px auto; border-radius: 4px; }}
+        #content hr {{ border: none; border-top: 1px solid var(--border); margin: 28px 0; }}
+        #content blockquote {{ border-left: 4px solid var(--accent); padding: 8px 16px; margin: 16px 0; background: #f8fafc; color: var(--text-secondary); border-radius: 0 4px 4px 0; }}
+        #content ul, #content ol {{ margin: 12px 0 12px 24px; }}
+        #content li {{ margin-bottom: 6px; }}
+        .footer {{ text-align: center; padding: 20px; color: #999; font-size: 12px; }}
+        @media (max-width: 768px) {{
+            .topbar {{ padding: 0 12px; }}
+            .topbar .brand {{ font-size: 13px; max-width: 50%; }}
+            #content {{ padding: 24px 20px; }}
+            .container {{ padding: 16px 12px 40px; }}
+        }}
+    </style>
+</head>
+<body>
+
+<div class="topbar">
+    <span class="brand">{title}</span>
+    <div class="nav-right">
+        <a href="{home_link}">&larr; Back to Home</a>
+        <span class="lang-badge">{lang_label}</span>
+    </div>
+</div>
+
+<div class="container">
+    <div id="content"></div>
+</div>
+
+<div class="footer">
+    Auto-generated by GitLab CI &mdash; ASPICE Documentation
+</div>
+
+<script>
+    var MD = `{escaped_md}`;
+    document.addEventListener('DOMContentLoaded', function() {{
+        marked.setOptions({{ breaks: false, gfm: true }});
+        document.getElementById('content').innerHTML = marked.parse(MD);
+    }});
+</script>
+
+</body>
+</html>"""
+    return html
+
+
+def convert_all_md_to_html():
+    """掃描 docs/ 下所有 *_xx.md，轉換為自給自足的 HTML"""
+    docs_dir = "docs"
+    converted = []
+
+    for root, dirs, files in os.walk(docs_dir):
+        for f in files:
+            if not f.endswith(".md"):
+                continue
+
+            lang = None
+            for l in LANGUAGES:
+                if f.endswith(f"_{l}.md"):
+                    lang = l
+                    break
+
+            if lang is None:
+                continue
+
+            md_path = os.path.join(root, f)
+            rel_path = os.path.relpath(root, docs_dir)
+
+            with open(md_path, "r", encoding="utf-8") as mf:
+                md_content = mf.read()
+
+            html_name = f.replace(".md", ".html")
+            html_path = os.path.join(root, html_name)
+
+            html_content = generate_page_html(md_content, lang, rel_path, f)
+
+            with open(html_path, "w", encoding="utf-8-sig") as hf:
+                hf.write(html_content)
+
+            converted.append(html_path)
+
+    return converted
 
 # ==========================================
 # 主程式
@@ -870,16 +1070,20 @@ def main():
     for lang in LANGUAGES:
         t = I18N[lang]
         index_md = generate_index_md(len(source_files), all_funcs_count, lang)
-        index_path = os.path.join(OUTPUT_BASE, f"index_{lang}.md")
+        index_path = os.path.join(OUTPUT_BASE, f"api_{lang}.md")
         with open(index_path, "w", encoding="utf-8") as f:
             f.write(index_md)
-        print(f"      ✓ index_{lang}.md ({t['nav_home']})")
+        print(f"      ✓ api_{lang}.md ({t['nav_home']})")
 
         detail_path = generate_api_detail_html(lang)
         print(f"      ✓ software_design_detail_{lang}.html")
 
     main_html_path = generate_main_index_html()
     print(f"      ✓ docs/index.html (主首頁，預設英文，右上語系下拉)")
+
+     # 將 docs/ 下所有 *_xx.md 轉換為自給自足的 HTML
+    converted_html = convert_all_md_to_html()
+    print(f"      ✓ {len(converted_html)} .md → .html 轉換完成")
 
     css_dir = os.path.join("docs", "stylesheets")
     os.makedirs(css_dir, exist_ok=True)
@@ -915,7 +1119,7 @@ def main():
     for lang in LANGUAGES:
         t = I18N[lang]
         nav_yaml_block = "\n".join(nav_entries_by_lang[lang])
-        nav_blocks.append(f"""  - {t['nav_home']} ({lang.upper()}): 03_software_detailed_design/api/index_{lang}.md
+        nav_blocks.append(f"""  - {t['nav_home']} ({lang.upper()}): 03_software_detailed_design/api/api_{lang}.md
   - {t['nav_source_structure']} ({lang.upper()}):
 {nav_yaml_block}""")
 
