@@ -55,7 +55,7 @@ pages:
     changes:
       - "**/*.c"
       - "**/*.h"
-      - "doc/**/*"
+      - "docs/**/*"
       - "mkdocs.yml"
       - "tools/gen_module_graph.py"
     refs:
