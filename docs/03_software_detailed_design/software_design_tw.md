@@ -251,38 +251,38 @@ flowchart TD
 ```mermaid
 block-beta
     columns 32
-    block:bit31:1 B31["31"]
-    block:bit30:1 B30["30"]
-    block:bit29:1 B29["29"]
-    block:bit28:1 B28["28"]
-    block:bit27:1 B27["27"]
-    block:bit26:1 B26["26"]
-    block:bit25:1 B25["25"]
-    block:bit24:1 B24["24"]
-    block:bit23:1 B23["23"]
-    block:bit22:1 B22["22"]
-    block:bit21:1 B21["21"]
-    block:bit20:1 B20["20"]
-    block:bit19:1 B19["19"]
-    block:bit18:1 B18["18"]
-    block:bit17:1 B17["17"]
-    block:bit16:1 B16["16"]
-    block:bit15:1 B15["15"]
-    block:bit14:1 B14["14"]
-    block:bit13:1 B13["13"]
-    block:bit12:1 B12["12"]
-    block:bit11:1 B11["11"]
-    block:bit10:1 B10["10"]
-    block:bit9:1 B9["9"]
-    block:bit8:1 B8["8"]
-    block:bit7:1 B7["7"]
-    block:bit6:1 B6["6"]
-    block:bit5:1 B5["5"]
-    block:bit4:1 B4["4"]
-    block:bit3:1 B3["3"]
-    block:bit2:1 B2["2"]
-    block:bit1:1 B1["1"]
-    block:bit0:1 B0["0"]
+    bit31["31"]:1
+    bit30["30"]:1
+    bit29["29"]:1
+    bit28["28"]:1
+    bit27["27"]:1
+    bit26["26"]:1
+    bit25["25"]:1
+    bit24["24"]:1
+    bit23["23"]:1
+    bit22["22"]:1
+    bit21["21"]:1
+    bit20["20"]:1
+    bit19["19"]:1
+    bit18["18"]:1
+    bit17["17"]:1
+    bit16["16"]:1
+    bit15["15"]:1
+    bit14["14"]:1
+    bit13["13"]:1
+    bit12["12"]:1
+    bit11["11"]:1
+    bit10["10"]:1
+    bit9["9"]:1
+    bit8["8"]:1
+    bit7["7"]:1
+    bit6["6"]:1
+    bit5["5"]:1
+    bit4["4"]:1
+    bit3["3"]:1
+    bit2["2"]:1
+    bit1["1"]:1
+    bit0["0"]:1
 ```
 
 ```txt
