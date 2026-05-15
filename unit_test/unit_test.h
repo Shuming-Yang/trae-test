@@ -35,6 +35,12 @@
     } \
 } while (0)
 
+/**
+ * @brief Run all unit test suites and print results summary
+ * @remark Test Criteria: All unit test suites executed and results reported.
+ * @param [in] N/A type=[N/A] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
+ * @retval type=[int] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
+ */
 int run_all_unit_tests(void);
 
 #endif /* UNIT_TEST_H */

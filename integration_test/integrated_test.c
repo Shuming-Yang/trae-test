@@ -67,18 +67,36 @@ static int simulate_input(const char *line) {
  * IT_01: Number Mode Input Parsing
  * ================================================================ */
 
+/**
+ * @brief Verify number mode input '1' triggers IRQ0 and clears pending after processing
+ * @remark Test Criteria: IT_01_01: input '1' triggers IRQ0, pending cleared.
+ * @param [in] N/A type=[N/A] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
+ * @retval type=[int] R=[0] P=[0] N=[N/A] D=[always returns 0 on success]
+ */
 static int test_number_mode_irq0(void) {
     simulate_input("1");
     IT_ASSERT_HEX_EQ(irq_get_pending(), 0, "IT_01_01: input '1' triggers IRQ0, pending cleared");
     return 0;
 }
 
+/**
+ * @brief Verify number mode input '32' triggers IRQ31 and clears pending after processing
+ * @remark Test Criteria: IT_01_02: input '32' triggers IRQ31, pending cleared.
+ * @param [in] N/A type=[N/A] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
+ * @retval type=[int] R=[0] P=[0] N=[N/A] D=[always returns 0 on success]
+ */
 static int test_number_mode_irq31(void) {
     simulate_input("32");
     IT_ASSERT_HEX_EQ(irq_get_pending(), 0, "IT_01_02: input '32' triggers IRQ31, pending cleared");
     return 0;
 }
 
+/**
+ * @brief Verify number mode input '0' processes all pending IRQs
+ * @remark Test Criteria: IT_01_03: input '0' processes pending IRQ3.
+ * @param [in] N/A type=[N/A] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
+ * @retval type=[int] R=[0] P=[0] N=[N/A] D=[always returns 0 on success]
+ */
 static int test_number_mode_zero(void) {
     irq_trigger(3);
     simulate_input("0");
@@ -86,6 +104,12 @@ static int test_number_mode_zero(void) {
     return 0;
 }
 
+/**
+ * @brief Verify number mode input '33' (out of range) does not modify pending register
+ * @remark Test Criteria: IT_01_04: input '33' should not change pending.
+ * @param [in] N/A type=[N/A] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
+ * @retval type=[int] R=[0] P=[0] N=[N/A] D=[always returns 0 on success]
+ */
 static int test_number_mode_invalid_33(void) {
     uint32_t before = irq_get_pending();
     simulate_input("33");
@@ -93,6 +117,12 @@ static int test_number_mode_invalid_33(void) {
     return 0;
 }
 
+/**
+ * @brief Verify number mode input '-5' (negative) does not modify pending register
+ * @remark Test Criteria: IT_01_05: input '-5' should not change pending.
+ * @param [in] N/A type=[N/A] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
+ * @retval type=[int] R=[0] P=[0] N=[N/A] D=[always returns 0 on success]
+ */
 static int test_number_mode_invalid_neg5(void) {
     uint32_t before = irq_get_pending();
     simulate_input("-5");
@@ -104,30 +134,60 @@ static int test_number_mode_invalid_neg5(void) {
  * IT_02: b-mode Input Parsing
  * ================================================================ */
 
+/**
+ * @brief Verify b-mode input 'b0' triggers IRQ0 and clears pending after processing
+ * @remark Test Criteria: IT_02_01: b0 triggers IRQ0, pending cleared.
+ * @param [in] N/A type=[N/A] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
+ * @retval type=[int] R=[0] P=[0] N=[N/A] D=[always returns 0 on success]
+ */
 static int test_bmode_irq0(void) {
     simulate_input("b0");
     IT_ASSERT_HEX_EQ(irq_get_pending(), 0, "IT_02_01: b0 triggers IRQ0, pending cleared");
     return 0;
 }
 
+/**
+ * @brief Verify b-mode input 'b5' triggers IRQ5 and clears pending after processing
+ * @remark Test Criteria: IT_02_02: b5 triggers IRQ5, pending cleared.
+ * @param [in] N/A type=[N/A] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
+ * @retval type=[int] R=[0] P=[0] N=[N/A] D=[always returns 0 on success]
+ */
 static int test_bmode_irq5(void) {
     simulate_input("b5");
     IT_ASSERT_HEX_EQ(irq_get_pending(), 0, "IT_02_02: b5 triggers IRQ5, pending cleared");
     return 0;
 }
 
+/**
+ * @brief Verify b-mode input 'b31' triggers IRQ31 and clears pending after processing
+ * @remark Test Criteria: IT_02_03: b31 triggers IRQ31, pending cleared.
+ * @param [in] N/A type=[N/A] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
+ * @retval type=[int] R=[0] P=[0] N=[N/A] D=[always returns 0 on success]
+ */
 static int test_bmode_irq31(void) {
     simulate_input("b31");
     IT_ASSERT_HEX_EQ(irq_get_pending(), 0, "IT_02_03: b31 triggers IRQ31, pending cleared");
     return 0;
 }
 
+/**
+ * @brief Verify b-mode uppercase input 'B10' triggers IRQ10 and clears pending after processing
+ * @remark Test Criteria: IT_02_04: B10 triggers IRQ10, pending cleared.
+ * @param [in] N/A type=[N/A] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
+ * @retval type=[int] R=[0] P=[0] N=[N/A] D=[always returns 0 on success]
+ */
 static int test_bmode_uppercase(void) {
     simulate_input("B10");
     IT_ASSERT_HEX_EQ(irq_get_pending(), 0, "IT_02_04: B10 triggers IRQ10, pending cleared");
     return 0;
 }
 
+/**
+ * @brief Verify b-mode input 'b32' (out of range) does not modify pending register
+ * @remark Test Criteria: IT_02_05: b32 should not change pending.
+ * @param [in] N/A type=[N/A] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
+ * @retval type=[int] R=[0] P=[0] N=[N/A] D=[always returns 0 on success]
+ */
 static int test_bmode_invalid_32(void) {
     uint32_t before = irq_get_pending();
     simulate_input("b32");
@@ -135,6 +195,12 @@ static int test_bmode_invalid_32(void) {
     return 0;
 }
 
+/**
+ * @brief Verify b-mode input 'b-1' (negative) does not modify pending register
+ * @remark Test Criteria: IT_02_06: b-1 should not change pending.
+ * @param [in] N/A type=[N/A] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
+ * @retval type=[int] R=[0] P=[0] N=[N/A] D=[always returns 0 on success]
+ */
 static int test_bmode_invalid_neg1(void) {
     uint32_t before = irq_get_pending();
     simulate_input("b-1");
@@ -146,36 +212,72 @@ static int test_bmode_invalid_neg1(void) {
  * IT_03: h-mode Input Parsing
  * ================================================================ */
 
+/**
+ * @brief Verify h-mode input 'h1' triggers IRQ0 and clears pending after processing
+ * @remark Test Criteria: IT_03_01: h1 triggers IRQ0, pending cleared.
+ * @param [in] N/A type=[N/A] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
+ * @retval type=[int] R=[0] P=[0] N=[N/A] D=[always returns 0 on success]
+ */
 static int test_hmode_h1(void) {
     simulate_input("h1");
     IT_ASSERT_HEX_EQ(irq_get_pending(), 0, "IT_03_01: h1 triggers IRQ0, pending cleared");
     return 0;
 }
 
+/**
+ * @brief Verify h-mode input 'h3' triggers IRQ0 and IRQ1, clears pending after processing
+ * @remark Test Criteria: IT_03_02: h3 triggers IRQ0,1, pending cleared.
+ * @param [in] N/A type=[N/A] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
+ * @retval type=[int] R=[0] P=[0] N=[N/A] D=[always returns 0 on success]
+ */
 static int test_hmode_h3(void) {
     simulate_input("h3");
     IT_ASSERT_HEX_EQ(irq_get_pending(), 0, "IT_03_02: h3 triggers IRQ0,1, pending cleared");
     return 0;
 }
 
+/**
+ * @brief Verify h-mode input 'hFF' triggers IRQ0~7 and clears pending after processing
+ * @remark Test Criteria: IT_03_03: hFF triggers IRQ0~7, pending cleared.
+ * @param [in] N/A type=[N/A] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
+ * @retval type=[int] R=[0] P=[0] N=[N/A] D=[always returns 0 on success]
+ */
 static int test_hmode_hFF(void) {
     simulate_input("hFF");
     IT_ASSERT_HEX_EQ(irq_get_pending(), 0, "IT_03_03: hFF triggers IRQ0~7, pending cleared");
     return 0;
 }
 
+/**
+ * @brief Verify h-mode input 'h80000000' triggers IRQ31 and clears pending after processing
+ * @remark Test Criteria: IT_03_04: h80000000 triggers IRQ31, pending cleared.
+ * @param [in] N/A type=[N/A] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
+ * @retval type=[int] R=[0] P=[0] N=[N/A] D=[always returns 0 on success]
+ */
 static int test_hmode_h80000000(void) {
     simulate_input("h80000000");
     IT_ASSERT_HEX_EQ(irq_get_pending(), 0, "IT_03_04: h80000000 triggers IRQ31, pending cleared");
     return 0;
 }
 
+/**
+ * @brief Verify h-mode uppercase input 'H0A' triggers IRQ1 and IRQ3, clears pending after processing
+ * @remark Test Criteria: IT_03_05: H0A triggers IRQ1,3, pending cleared.
+ * @param [in] N/A type=[N/A] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
+ * @retval type=[int] R=[0] P=[0] N=[N/A] D=[always returns 0 on success]
+ */
 static int test_hmode_uppercase(void) {
     simulate_input("H0A");
     IT_ASSERT_HEX_EQ(irq_get_pending(), 0, "IT_03_05: H0A triggers IRQ1,3, pending cleared");
     return 0;
 }
 
+/**
+ * @brief Verify h-mode input 'hGG' (invalid hex) does not modify pending register
+ * @remark Test Criteria: IT_03_06: hGG should not change pending.
+ * @param [in] N/A type=[N/A] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
+ * @retval type=[int] R=[0] P=[0] N=[N/A] D=[always returns 0 on success]
+ */
 static int test_hmode_invalid(void) {
     uint32_t before = irq_get_pending();
     simulate_input("hGG");
@@ -187,6 +289,12 @@ static int test_hmode_invalid(void) {
  * IT_04: Accumulated Trigger & Priority
  * ================================================================ */
 
+/**
+ * @brief Verify accumulated trigger: irq_trigger(0) followed by h-mode 'h6' processes IRQ0,1,2
+ * @remark Test Criteria: IT_04_01: trigger(0)+h6 processes IRQ0,1,2.
+ * @param [in] N/A type=[N/A] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
+ * @retval type=[int] R=[0] P=[0] N=[N/A] D=[always returns 0 on success]
+ */
 static int test_accumulate_trigger_then_hmode(void) {
     irq_trigger(0);
     simulate_input("h6");
@@ -194,6 +302,12 @@ static int test_accumulate_trigger_then_hmode(void) {
     return 0;
 }
 
+/**
+ * @brief Verify multiple b-mode inputs accumulate and are processed by manual '0' command
+ * @remark Test Criteria: IT_04_02: b10+b5+0 processes IRQ5,10.
+ * @param [in] N/A type=[N/A] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
+ * @retval type=[int] R=[0] P=[0] N=[N/A] D=[always returns 0 on success]
+ */
 static int test_accumulate_multi_bmode(void) {
     simulate_input("b10");
     simulate_input("b5");
@@ -202,6 +316,12 @@ static int test_accumulate_multi_bmode(void) {
     return 0;
 }
 
+/**
+ * @brief Verify priority order: h-mode 'h80000001' processes IRQ0 before IRQ31
+ * @remark Test Criteria: IT_04_03: h80000001 processes IRQ0 before IRQ31.
+ * @param [in] N/A type=[N/A] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
+ * @retval type=[int] R=[0] P=[0] N=[N/A] D=[always returns 0 on success]
+ */
 static int test_priority_order(void) {
     simulate_input("h80000001");
     IT_ASSERT_HEX_EQ(irq_get_pending(), 0, "IT_04_03: h80000001 processes IRQ0 before IRQ31");
@@ -212,11 +332,23 @@ static int test_priority_order(void) {
  * IT_05: Tick Count Consistency
  * ================================================================ */
 
+/**
+ * @brief Verify initial tick count is zero at start of integration test
+ * @remark Test Criteria: IT_05_01: initial tick should be 0.
+ * @param [in] N/A type=[N/A] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
+ * @retval type=[int] R=[0] P=[0] N=[N/A] D=[always returns 0 on success]
+ */
 static int test_tick_initial_zero(void) {
     IT_ASSERT_EQ(irq_get_tick(), 0, "IT_05_01: initial tick should be 0");
     return 0;
 }
 
+/**
+ * @brief Verify IRQ0 handler increments tick count by 1
+ * @remark Test Criteria: IT_05_02: IRQ0 handler increments tick by 1.
+ * @param [in] N/A type=[N/A] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
+ * @retval type=[int] R=[0] P=[0] N=[N/A] D=[always returns 0 on success]
+ */
 static int test_tick_irq0_increment(void) {
     unsigned int before = irq_get_tick();
     irq_trigger(0);
@@ -225,6 +357,12 @@ static int test_tick_irq0_increment(void) {
     return 0;
 }
 
+/**
+ * @brief Verify non-IRQ0 handler does not change tick count
+ * @remark Test Criteria: IT_05_03: non-IRQ0 should not change tick.
+ * @param [in] N/A type=[N/A] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
+ * @retval type=[int] R=[0] P=[0] N=[N/A] D=[always returns 0 on success]
+ */
 static int test_tick_non_irq0_no_change(void) {
     unsigned int before = irq_get_tick();
     irq_trigger(5);
@@ -233,6 +371,12 @@ static int test_tick_non_irq0_no_change(void) {
     return 0;
 }
 
+/**
+ * @brief Verify three separate IRQ0 triggers each increment tick by 1 (total +3)
+ * @remark Test Criteria: IT_05_04: three separate IRQ0 triggers increment tick by 3.
+ * @param [in] N/A type=[N/A] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
+ * @retval type=[int] R=[0] P=[0] N=[N/A] D=[always returns 0 on success]
+ */
 static int test_tick_multi_irq0(void) {
     unsigned int before = irq_get_tick();
     irq_trigger(0);
@@ -249,12 +393,24 @@ static int test_tick_multi_irq0(void) {
  * IT_06: Exit & Boundary Conditions
  * ================================================================ */
 
+/**
+ * @brief Verify simulate_input returns 1 when 'exit' command is processed
+ * @remark Test Criteria: IT_06_01: 'exit' should return 1.
+ * @param [in] N/A type=[N/A] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
+ * @retval type=[int] R=[0] P=[0] N=[N/A] D=[always returns 0 on success]
+ */
 static int test_exit_returns_one(void) {
     int result = simulate_input("exit");
     IT_ASSERT_EQ(result, 1, "IT_06_01: 'exit' should return 1");
     return 0;
 }
 
+/**
+ * @brief Verify empty input string does not crash or modify pending register
+ * @remark Test Criteria: IT_06_02: empty input should not crash.
+ * @param [in] N/A type=[N/A] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
+ * @retval type=[int] R=[0] P=[0] N=[N/A] D=[always returns 0 on success]
+ */
 static int test_empty_input_safe(void) {
     uint32_t before = irq_get_pending();
     simulate_input("");
@@ -262,6 +418,12 @@ static int test_empty_input_safe(void) {
     return 0;
 }
 
+/**
+ * @brief Verify garbage input 'xyz' does not crash or modify pending register
+ * @remark Test Criteria: IT_06_03: garbage input should not crash.
+ * @param [in] N/A type=[N/A] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
+ * @retval type=[int] R=[0] P=[0] N=[N/A] D=[always returns 0 on success]
+ */
 static int test_garbage_input_safe(void) {
     uint32_t before = irq_get_pending();
     simulate_input("xyz");
@@ -273,6 +435,12 @@ static int test_garbage_input_safe(void) {
  * IT_07: End-to-End Full Flow
  * ================================================================ */
 
+/**
+ * @brief Verify end-to-end full flow: number mode, b-mode, h-mode, and exit in sequence
+ * @remark Test Criteria: IT_07_01: full flow with all input modes and exit.
+ * @param [in] N/A type=[N/A] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
+ * @retval type=[int] R=[0] P=[0] N=[N/A] D=[always returns 0 on success]
+ */
 static int test_full_flow(void) {
     simulate_input("1");
     IT_ASSERT_HEX_EQ(irq_get_pending(), 0, "IT_07_01: step1 '1' -> IRQ0 processed");
@@ -293,6 +461,12 @@ static int test_full_flow(void) {
  * Test Runner
  * ================================================================ */
 
+/**
+ * @brief Execute all integration test suites and print pass/fail summary
+ * @remark Test Criteria: All 7 integration test suites executed, results aggregated and reported.
+ * @param [in] N/A type=[N/A] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
+ * @retval type=[int] R=[0|1] P=[0=all passed, 1=some failed] N=[N/A] D=[exit code: 0 on success, 1 on failure]
+ */
 int run_all_integrated_tests(void) {
     g_it_passed = 0;
     g_it_failed = 0;
@@ -350,6 +524,12 @@ int run_all_integrated_tests(void) {
     return (g_it_failed > 0) ? 1 : 0;
 }
 
+/**
+ * @brief Integration test program entry point
+ * @remark Test Criteria: Program returns 0 when all tests pass, non-zero otherwise.
+ * @param [in] N/A type=[N/A] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
+ * @retval type=[int] R=[0|1] P=[0=all passed, 1=some failed] N=[N/A] D=[exit code from run_all_integrated_tests]
+ */
 int main(void) {
     return run_all_integrated_tests();
 }
