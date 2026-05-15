@@ -293,7 +293,7 @@ Bit 31 = IRQ31 (Lowest Priority)
 ### 4.2 Tick Counter Lifecycle
 
 ```mermaid
-stateDiagram-v2
+stateDiagram
     [*] --> Init: Program start
     Init --> Running: g_tick_count = 0
     Running --> Running: Main loop iteration: g_tick_count++

@@ -293,7 +293,7 @@ Bit 31 = IRQ31 (最低优先权)
 ### 4.2 Tick Counter Lifecycle
 
 ```mermaid
-stateDiagram-v2
+stateDiagram
     [*] --> Init: 程序启动
     Init --> Running: g_tick_count = 0
     Running --> Running: 主循环迭代: g_tick_count++
