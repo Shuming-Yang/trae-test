@@ -147,13 +147,13 @@ def main():
         # Replace placeholder section with actual results
         placeholder = "<!-- TEST_SUMMARY_PLACEHOLDER -->"
         if placeholder in report_content:
-            # Find the placeholder and replace everything from it to the next "> Run" hint
+            # Replace from placeholder to the next blockquote hint line
             import re
             pattern = re.compile(
-                re.escape(placeholder) + r".*?(?=\n> \*\*|$)",
+                re.escape(placeholder) + r".*?(?=\n> Run `python)",
                 re.DOTALL
             )
-            replacement = placeholder + "\n" + summary_md
+            replacement = placeholder + "\n" + summary_md + "\n"
             report_content = pattern.sub(replacement, report_content, count=1)
 
             with open(report_md_path, "w", encoding="utf-8") as f:
