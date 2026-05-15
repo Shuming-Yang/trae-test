@@ -52,6 +52,7 @@ flowchart TD
 |----|---------|------|---------|
 | UT_02_01 | Function callable without crash | `exception_irq_handler()` | Returns normally |
 | UT_02_02 | Multiple calls | Call 3 times | Returns normally, no side effects |
+| UT_02_03 | Internal counter verification | Call 3 times | `exception_get_count() == 3` |
 
 ### UT_03: irq_trigger
 
@@ -73,6 +74,7 @@ flowchart TD
 | UT_04_02 | Handle IRQ5 | trigger(5) → handler(5) | pending bit 5 cleared |
 | UT_04_03 | Handle IRQ31 | trigger(31) → handler(31) | pending bit 31 cleared |
 | UT_04_04 | Pending cleared after handling | trigger(0) → handler(0) | `irq_get_pending() == 0` |
+| UT_04_05 | Invalid IRQ number (default branch) | `irq_handler(99)` | No crash, prints "Unknown IRQ" |
 
 ### UT_05: irq_process_all
 
@@ -98,6 +100,7 @@ flowchart TD
 | UT_07_01 | Initial pending | reset → get_pending | Returns 0 |
 | UT_07_02 | Initial tick | reset → get_tick | Returns 0 |
 | UT_07_03 | Pending after trigger | trigger(7) → get_pending | Returns 0x00000080 |
+| UT_07_04 | Non-zero tick value | tick×3 → get_tick | Returns 3 |
 
 ### UT_08: irq_trigger_raw
 
@@ -136,12 +139,12 @@ flowchart TD
 | ID | Chapter | Trace to SD | Description |
 |----|---------|-------------|-------------|
 | UT_01 | 3 (UT_01) | SD_009 | `tick_irq_handler`: initial value, single call, multiple calls, post-reset behavior |
-| UT_02 | 3 (UT_02) | SD_006 | `exception_irq_handler`: callable without crash, multiple calls with no side effects |
+| UT_02 | 3 (UT_02) | SD_006 | `exception_irq_handler`: callable without crash, multiple calls with no side effects, internal counter verification |
 | UT_03 | 3 (UT_03) | SD_004<br>SD_008<br>SD_010 | `irq_trigger`: boundary (IRQ0/IRQ5/IRQ31), cumulative, duplicate, invalid range (32, 99) |
-| UT_04 | 3 (UT_04) | SD_006<br>SD_013 | `irq_handler`: dispatch (IRQ0/IRQ5/IRQ31), pending bit cleared after handling |
+| UT_04 | 3 (UT_04) | SD_006<br>SD_013 | `irq_handler`: dispatch (IRQ0/IRQ5/IRQ31), pending bit cleared after handling, invalid IRQ number (default branch) |
 | UT_05 | 3 (UT_05) | SD_005 | `irq_process_all`: empty pending, single IRQ, multiple IRQs, all 32 IRQs |
 | UT_06 | 3 (UT_06) | SD_002<br>SD_009<br>SD_011 | `irq_reset_all`: reset pending, reset tick, reset both simultaneously |
-| UT_07 | 3 (UT_07) | SD_002<br>SD_011 | `irq_get_pending` / `irq_get_tick`: initial values, post-trigger readback |
+| UT_07 | 3 (UT_07) | SD_002<br>SD_011 | `irq_get_pending` / `irq_get_tick`: initial values, post-trigger readback, non-zero tick value |
 | UT_08 | 3 (UT_08) | SD_014<br>SD_010 | `irq_trigger_raw`: single/multiple/zero/full mask, cumulative OR, MSB boundary |
 | UT_09 | 3 (UT_09) | SD_006<br>SD_013 | `irq_handler` boundary: no-pending call, middle IRQ (IRQ15), only target bit cleared |
 | UT_10 | 3 (UT_10) | SD_005 | `irq_process_all` boundary: highest/lowest priority only, priority order verification |

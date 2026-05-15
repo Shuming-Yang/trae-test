@@ -52,6 +52,7 @@ flowchart TD
 |----|---------|------|---------|
 | UT_02_01 | 函数可被调用不崩溃 | `exception_irq_handler()` | 正常返回 |
 | UT_02_02 | 多次调用 | 调用 3 次 | 正常返回，无副作用 |
+| UT_02_03 | 内部计数器验证 | 调用 3 次 | `exception_get_count() == 3` |
 
 ### UT_03: irq_trigger
 
@@ -73,6 +74,7 @@ flowchart TD
 | UT_04_02 | 处理 IRQ5 | trigger(5) → handler(5) | pending bit 5 清除 |
 | UT_04_03 | 处理 IRQ31 | trigger(31) → handler(31) | pending bit 31 清除 |
 | UT_04_04 | 处理后 pending 归零 | trigger(0) → handler(0) | `irq_get_pending() == 0` |
+| UT_04_05 | 无效 IRQ 号（default 分支） | `irq_handler(99)` | 不崩溃，输出 "Unknown IRQ" |
 
 ### UT_05: irq_process_all
 
@@ -98,6 +100,7 @@ flowchart TD
 | UT_07_01 | 初始 pending | reset → get_pending | 返回 0 |
 | UT_07_02 | 初始 tick | reset → get_tick | 返回 0 |
 | UT_07_03 | 触发后 pending | trigger(7) → get_pending | 返回 0x00000080 |
+| UT_07_04 | 非零 tick 值 | tick×3 → get_tick | 返回 3 |
 
 ### UT_08: irq_trigger_raw
 
@@ -136,12 +139,12 @@ flowchart TD
 | ID | 章节 | 追溯 SD | 描述 |
 |----|------|---------|------|
 | UT_01 | 3 (UT_01) | SD_009 | `tick_irq_handler`：初始值、单次调用、多次调用、重置后行为 |
-| UT_02 | 3 (UT_02) | SD_006 | `exception_irq_handler`：可调用不崩溃、多次调用无副作用 |
+| UT_02 | 3 (UT_02) | SD_006 | `exception_irq_handler`：可调用不崩溃、多次调用无副作用、内部计数器验证 |
 | UT_03 | 3 (UT_03) | SD_004<br>SD_008<br>SD_010 | `irq_trigger`：边界 (IRQ0/IRQ5/IRQ31)、累积、重复、无效范围 (32, 99) |
-| UT_04 | 3 (UT_04) | SD_006<br>SD_013 | `irq_handler`：分发 (IRQ0/IRQ5/IRQ31)、处理后 pending bit 清除 |
+| UT_04 | 3 (UT_04) | SD_006<br>SD_013 | `irq_handler`：分发 (IRQ0/IRQ5/IRQ31)、处理后 pending bit 清除、无效 IRQ 号 (default 分支) |
 | UT_05 | 3 (UT_05) | SD_005 | `irq_process_all`：空 pending、单一 IRQ、多重 IRQ、全部 32 个 IRQ |
 | UT_06 | 3 (UT_06) | SD_002<br>SD_009<br>SD_011 | `irq_reset_all`：重置 pending、重置 tick、同时重置两者 |
-| UT_07 | 3 (UT_07) | SD_002<br>SD_011 | `irq_get_pending` / `irq_get_tick`：初始值、触发后回读 |
+| UT_07 | 3 (UT_07) | SD_002<br>SD_011 | `irq_get_pending` / `irq_get_tick`：初始值、触发后回读、非零 tick 值 |
 | UT_08 | 3 (UT_08) | SD_014<br>SD_010 | `irq_trigger_raw`：单/多/零/全掩码、累积 OR、MSB 边界 |
 | UT_09 | 3 (UT_09) | SD_006<br>SD_013 | `irq_handler` 边界：无 pending 调用、中间 IRQ (IRQ15)、仅清除目标 bit |
 | UT_10 | 3 (UT_10) | SD_005 | `irq_process_all` 边界：仅最高/最低优先级、优先级顺序验证 |
