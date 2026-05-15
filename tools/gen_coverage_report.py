@@ -121,17 +121,44 @@ def main():
     failed = test_output.count("[FAIL]")
     total = passed + failed
     timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+    pass_rate = f"{passed/total*100:.1f}%" if total > 0 else "N/A"
+
+    summary_md = (
+        f"| Metric | Value |\n"
+        f"|--------|-------|\n"
+        f"| **Total Tests** | {total} |\n"
+        f"| **Passed** | {passed} |\n"
+        f"| **Failed** | {failed} |\n"
+        f"| **Pass Rate** | {pass_rate} |\n"
+        f"| **Generated** | {timestamp} |\n"
+    )
 
     summary_path = os.path.join(COVERAGE_OUTPUT_DIR, "test_summary.md")
     with open(summary_path, "w", encoding="utf-8") as f:
-        f.write(f"| Metric | Value |\n")
-        f.write(f"|--------|-------|\n")
-        f.write(f"| **Total Tests** | {total} |\n")
-        f.write(f"| **Passed** | {passed} |\n")
-        f.write(f"| **Failed** | {failed} |\n")
-        f.write(f"| **Pass Rate** | {passed/total*100:.1f}% |\n" if total > 0 else "| **Pass Rate** | N/A |\n")
-        f.write(f"| **Generated** | {timestamp} |\n")
+        f.write(summary_md)
     print(f"  Generated: test_summary.md")
+
+    # Inject test summary into coverage_report.md
+    report_md_path = os.path.join(PROJECT_ROOT, "docs", "04_software_unit_verification", "coverage_report.md")
+    if os.path.exists(report_md_path):
+        with open(report_md_path, "r", encoding="utf-8") as f:
+            report_content = f.read()
+
+        # Replace placeholder section with actual results
+        placeholder = "<!-- TEST_SUMMARY_PLACEHOLDER -->"
+        if placeholder in report_content:
+            # Find the placeholder and replace everything from it to the next "> Run" hint
+            import re
+            pattern = re.compile(
+                re.escape(placeholder) + r".*?(?=\n> \*\*|$)",
+                re.DOTALL
+            )
+            replacement = placeholder + "\n" + summary_md
+            report_content = pattern.sub(replacement, report_content, count=1)
+
+            with open(report_md_path, "w", encoding="utf-8") as f:
+                f.write(report_content)
+            print(f"  Updated: coverage_report.md with test results")
 
     print("\n" + "=" * 60)
     print(f"  Coverage report generated successfully!")
