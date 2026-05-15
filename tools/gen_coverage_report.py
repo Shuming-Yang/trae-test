@@ -68,9 +68,8 @@ def main():
     print("\n[4/5] Generating coverage reports...")
 
     # Ensure gcovr is available
-    gcovr_check = subprocess.run(["gcovr", "--version"], capture_output=True, text=True)
-    if gcovr_check.returncode != 0:
-        print("  [INFO] Installing gcovr via pip...")
+    if not shutil.which("gcovr"):
+        print("  [INFO] gcovr not found, installing via pip...")
         run_cmd([sys.executable, "-m", "pip", "install", "gcovr"])
 
     # Generate HTML report
