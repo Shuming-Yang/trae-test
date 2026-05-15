@@ -17,6 +17,8 @@ target_compile_definitions(unit_test PRIVATE TEST_BUILD)
 if(ENABLE_COVERAGE)
     target_compile_options(unit_test PRIVATE --coverage -O0)
     target_link_options(unit_test PRIVATE --coverage)
+    target_compile_options(integrated_test PRIVATE --coverage -O0)
+    target_link_options(integrated_test PRIVATE --coverage)
 endif()
 
 add_executable(integrated_test integration_test/integrated_test.c src/main.c)
