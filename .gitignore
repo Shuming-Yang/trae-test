@@ -22,7 +22,7 @@ docs/03_software_detailed_design/auto_generated/func_*.md
 # Auto-generated coverage reports (CI pipeline)
 docs/04_software_unit_verification/coverage/
 docs/05_software_integration_test/coverage/
-docs/05_software_integration_test/misra_report/
+docs/05_software_integration_test/misra_html/
 
 # include files
 # \!build/*.dll

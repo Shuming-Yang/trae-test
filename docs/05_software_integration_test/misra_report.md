@@ -28,14 +28,14 @@ python tools/gen_misra_report.py
 The detailed MISRA report has not been generated yet. After running the generator, the HTML report will be available below.
 
 <iframe
-    src="../misra_report/index.html"
+    src="../misra_html/index.html"
     width="100%"
     height="800px"
     style="border: 1px solid #ddd; border-radius: 4px;"
     title="MISRA C 2012 Report">
 </iframe>
 
-> If the iframe does not display, you can open the [MISRA report](../misra_report/index.html) directly.
+> If the iframe does not display, you can open the [MISRA report](../misra_html/index.html) directly.
 
 ---
 

@@ -22,7 +22,7 @@ import time
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC_DIR = os.path.join(PROJECT_ROOT, "src")
 INC_DIR = os.path.join(PROJECT_ROOT, "inc")
-OUTPUT_DIR = os.path.join(PROJECT_ROOT, "docs", "05_software_integration_test", "misra_report")
+OUTPUT_DIR = os.path.join(PROJECT_ROOT, "docs", "05_software_integration_test", "misra_html")
 BUILD_DIR = os.path.join(PROJECT_ROOT, "build")
 MISRA_BUILD_DIR = os.path.join(BUILD_DIR, "misra_build")
 
