@@ -249,7 +249,7 @@ flowchart TD
 ### 4.1 IRQ Pending Register
 
 ```mermaid
-block
+block-beta
     columns 32
     block:bit31:1 B31["31"]
     block:bit30:1 B30["30"]
@@ -285,7 +285,7 @@ block
     block:bit0:1 B0["0"]
 ```
 
-```
+```txt
 Bit 0  = IRQ0  (最高优先权)
 Bit 31 = IRQ31 (最低优先权)
 ```
