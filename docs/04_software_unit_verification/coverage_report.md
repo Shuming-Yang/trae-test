@@ -29,20 +29,20 @@ python tools/gen_coverage_report.py
 The coverage report has not been generated yet. After running the generator, the HTML coverage report will be available below.
 
 <iframe
-    src="coverage/coverage.html"
+    src="../coverage/coverage.html"
     width="100%"
     height="800px"
     style="border: 1px solid #ddd; border-radius: 4px;"
     title="Code Coverage Report">
 </iframe>
 
-> If the iframe does not display, you can open the [coverage report](coverage/coverage.html) directly.
+> If the iframe does not display, you can open the [coverage report](../coverage/coverage.html) directly.
 
 ---
 
 ## Download Coverage Data
 
-- [coverage.xml](coverage/coverage.xml) — Cobertura XML format (for CI/CD integration, e.g., GitLab MR coverage visualization)
+- [coverage.xml](../coverage/coverage.xml) — Cobertura XML format (for CI/CD integration, e.g., GitLab MR coverage visualization)
 
 ---
 

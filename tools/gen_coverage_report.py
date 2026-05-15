@@ -72,27 +72,39 @@ def main():
         print("  [INFO] gcovr not found, installing via pip...")
         run_cmd([sys.executable, "-m", "pip", "install", "gcovr"])
 
+    # Verify .gcda files exist after test run
+    gcda_count = 0
+    for root, dirs, files in os.walk(COVERAGE_BUILD_DIR):
+        for f in files:
+            if f.endswith(".gcda"):
+                gcda_count += 1
+                print(f"  [DEBUG] Found .gcda: {os.path.join(root, f)}")
+    print(f"  [DEBUG] Total .gcda files: {gcda_count}")
+
     # Generate HTML report
+    # Run gcovr from project root, search for .gcda in build dir, filter to src/
     print("  Generating HTML coverage report...")
     run_cmd([
         "gcovr",
-        "-r", os.path.join(PROJECT_ROOT, "src"),
+        "--root", PROJECT_ROOT,
+        "--filter", "src/",
         "--html", "--html-details",
         "-o", os.path.join(COVERAGE_BUILD_DIR, "coverage.html"),
         "--exclude", ".*start.s.*",
-        "--exclude", ".*unit_test.*",
-    ], cwd=COVERAGE_BUILD_DIR)
+        COVERAGE_BUILD_DIR,
+    ], cwd=PROJECT_ROOT)
 
     # Generate Cobertura XML report
     print("  Generating XML coverage report (Cobertura)...")
     run_cmd([
         "gcovr",
-        "-r", os.path.join(PROJECT_ROOT, "src"),
+        "--root", PROJECT_ROOT,
+        "--filter", "src/",
         "--xml",
         "-o", os.path.join(COVERAGE_BUILD_DIR, "coverage.xml"),
         "--exclude", ".*start.s.*",
-        "--exclude", ".*unit_test.*",
-    ], cwd=COVERAGE_BUILD_DIR)
+        COVERAGE_BUILD_DIR,
+    ], cwd=PROJECT_ROOT)
 
     # Step 5: Copy reports to docs directory
     print("\n[5/5] Copying reports to docs directory...")
