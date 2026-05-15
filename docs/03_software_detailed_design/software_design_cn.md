@@ -249,7 +249,7 @@ flowchart TD
 ### 4.1 IRQ Pending Register
 
 ```mermaid
-block-beta
+block
     columns 32
     block:bit31:1 B31["31"]
     block:bit30:1 B30["30"]
@@ -330,3 +330,38 @@ stateDiagram-v2
 ### DD-04: 为何 h-mode 使用 `|=` 而非 `=`？
 - 允许累积触发：先触发一些 IRQ，再用 h-mode 追加
 - 更贴近真实硬件中断控制器的行为
+
+## 7. 详细设计追溯表
+
+| ID | 章节 | 追溯 SA | 追溯 SR | 描述 |
+|----|------|---------|---------|------|
+| SD_001 | 2.1 | SA_003 | SR_001<br>SR_044 | Public API (`main.h`)：9 个函数声明 + `IRQ_COUNT` 常量定义 |
+| SD_002 | 2.2 | SA_005<br>SA_006 | SR_001<br>SR_002<br>SR_003<br>SR_036<br>SR_037<br>SR_038 | 内部状态：`irq_pending` (static uint32_t) 与 `g_tick_count` (static unsigned int) 作为文件级变量 |
+| SD_003 | 2.3 | SA_023 | SR_039 | `TICK_PRINTF` 宏：`printf` 带 `[tick: N]` 前缀，使用 `##__VA_ARGS__` 支持零参数 |
+| SD_004 | 3.1 | SA_009 | SR_003<br>SR_004<br>SR_005<br>SR_042 | `irq_trigger()` 算法：范围检查 (`irq_num < 32`) → 位设置 (`1 << irq_num`) → 日志 |
+| SD_005 | 3.2 | SA_011 | SR_007<br>SR_008 | `irq_process_all()` 算法：空检查 → 优先级循环 (IRQ0→IRQ31) → 逐 pending bit 分发处理 |
+| SD_006 | 3.3 | SA_012<br>SA_013<br>SA_014 | SR_009<br>SR_010<br>SR_035<br>SR_045 | `irq_handler()` 分发：switch-case 覆盖 32 个 IRQ 行为 → 处理后清除 pending bit |
+| SD_007 | 3.4 | SA_007<br>SA_008 | SR_004<br>SR_005<br>SR_006<br>SR_037<br>SR_040<br>SR_041<br>SR_042<br>SR_043 | 输入解析算法：tick 递增 → 读取 stdin → 解析 (b/h/数字/0/exit) → 触发 → 处理 |
+| SD_008 | 4.1 | SA_005 | SR_001<br>SR_002<br>SR_003 | IRQ Pending Register 布局：32-bit，Bit 0=IRQ0（最高优先级）至 Bit 31=IRQ31（最低优先级） |
+| SD_009 | 4.2 | SA_006 | SR_036<br>SR_037<br>SR_038 | Tick 计数器生命周期：Init (g_tick_count=0) → Running (循环/IRQ0 递增) → Reset (irq_reset_all) |
+| SD_010 | 5 | SA_025 | SR_042<br>SR_043 | 错误处理设计：6 种场景（范围越界、无效 b/h 模式、无效数字、无法解析、EOF） |
+| SD_011 | 6 | SA_002<br>SA_003 | SR_044 | DD-01：static 文件级变量 — 限制可见范围，通过 test accessor 函数受控访问 |
+| SD_012 | 6 | SA_023 | SR_039 | DD-02：TICK_PRINTF 宏 vs 包装函数 — 零调用开销、`##__VA_ARGS__`、统一日志格式 |
+| SD_013 | 6 | SA_024 | SR_009 | DD-03：立即清除 pending bit — 模拟真实硬件 ISR 行为，防止重复处理 |
+| SD_014 | 6 | SA_010 | SR_003<br>SR_006 | DD-04：h-mode `|=` vs `=` — 累积触发，贴近真实中断控制器行为 |
+
+### 章节对照表
+
+| 章节 | SD 范围 | 数量 | 内容 |
+|------|---------|------|------|
+| 2 | SD_001 ~ SD_003 | 3 | 接口设计 |
+| 3 | SD_004 ~ SD_007 | 4 | 算法设计 |
+| 4 | SD_008 ~ SD_009 | 2 | 数据结构设计 |
+| 5 | SD_010 | 1 | 错误处理设计 |
+| 6 | SD_011 ~ SD_014 | 4 | 设计决策 |
+
+> **缩写说明：**
+>
+> - **SD** = Software Detailed Design（软件详细设计，为所有详细设计项的统一编号）
+> - **SA** = Software Architecture（软件架构，追溯至 SWE.2 架构项）
+> - **SR** = Software Requirement（软件需求，追溯至 SWE.1 需求项）

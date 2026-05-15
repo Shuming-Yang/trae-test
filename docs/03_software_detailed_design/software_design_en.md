@@ -249,7 +249,7 @@ flowchart TD
 ### 4.1 IRQ Pending Register
 
 ```mermaid
-block-beta
+block
     columns 32
     block:bit31:1 B31["31"]
     block:bit30:1 B30["30"]
@@ -330,3 +330,38 @@ stateDiagram-v2
 ### DD-04: Why does h-mode use `|=` instead of `=`?
 - Allows cumulative triggering: trigger some IRQs first, then append via h-mode
 - More closely mirrors real hardware interrupt controller behavior
+
+## 7. Detailed Design Traceability
+
+| ID | Chapter | Trace to SA | Trace to SR | Description |
+|----|---------|-------------|-------------|-------------|
+| SD_001 | 2.1 | SA_003 | SR_001<br>SR_044 | Public API (`main.h`): 9 function declarations + `IRQ_COUNT` constant definition |
+| SD_002 | 2.2 | SA_005<br>SA_006 | SR_001<br>SR_002<br>SR_003<br>SR_036<br>SR_037<br>SR_038 | Internal State: `irq_pending` (static uint32_t) and `g_tick_count` (static unsigned int) as file-scope variables |
+| SD_003 | 2.3 | SA_023 | SR_039 | `TICK_PRINTF` macro: `printf` with `[tick: N]` prefix, uses `##__VA_ARGS__` for zero-arg support |
+| SD_004 | 3.1 | SA_009 | SR_003<br>SR_004<br>SR_005<br>SR_042 | `irq_trigger()` algorithm: range check (`irq_num < 32`) → bit set (`1 << irq_num`) → log |
+| SD_005 | 3.2 | SA_011 | SR_007<br>SR_008 | `irq_process_all()` algorithm: empty check → priority loop (IRQ0→IRQ31) → handler dispatch per pending bit |
+| SD_006 | 3.3 | SA_012<br>SA_013<br>SA_014 | SR_009<br>SR_010<br>SR_035<br>SR_045 | `irq_handler()` dispatch: switch-case for 32 IRQ behaviors → clear pending bit after handling |
+| SD_007 | 3.4 | SA_007<br>SA_008 | SR_004<br>SR_005<br>SR_006<br>SR_037<br>SR_040<br>SR_041<br>SR_042<br>SR_043 | Input parsing algorithm: tick increment → read stdin → parse (b/h/numeric/0/exit) → trigger → process |
+| SD_008 | 4.1 | SA_005 | SR_001<br>SR_002<br>SR_003 | IRQ Pending Register layout: 32-bit, Bit 0=IRQ0 (highest priority) to Bit 31=IRQ31 (lowest priority) |
+| SD_009 | 4.2 | SA_006 | SR_036<br>SR_037<br>SR_038 | Tick Counter Lifecycle: Init (g_tick_count=0) → Running (loop/IRQ0 increment) → Reset (irq_reset_all) |
+| SD_010 | 5 | SA_025 | SR_042<br>SR_043 | Error handling design: 6 scenarios (range out, invalid b/h-mode, invalid number, unparseable, EOF) |
+| SD_011 | 6 | SA_002<br>SA_003 | SR_044 | DD-01: static file-scope variables — limits visibility, controlled access via test accessor functions |
+| SD_012 | 6 | SA_023 | SR_039 | DD-02: TICK_PRINTF macro vs wrapper function — zero call overhead, `##__VA_ARGS__`, unified log format |
+| SD_013 | 6 | SA_024 | SR_009 | DD-03: Immediate pending bit clear — simulates real hardware ISR behavior, prevents re-processing |
+| SD_014 | 6 | SA_010 | SR_003<br>SR_006 | DD-04: h-mode `|=` vs `=` — cumulative triggering, mirrors real interrupt controller behavior |
+
+### Chapter Mapping
+
+| Chapter | SD Range | Count | Content |
+|---------|----------|-------|---------|
+| 2 | SD_001 ~ SD_003 | 3 | Interface Design |
+| 3 | SD_004 ~ SD_007 | 4 | Algorithm Design |
+| 4 | SD_008 ~ SD_009 | 2 | Data Structure Design |
+| 5 | SD_010 | 1 | Error Handling Design |
+| 6 | SD_011 ~ SD_014 | 4 | Design Decisions |
+
+> **Abbreviation Notes:**
+>
+> - **SD** = Software Detailed Design (unified numbering for all detailed design items)
+> - **SA** = Software Architecture (traceability back to SWE.2 architecture items)
+> - **SR** = Software Requirement (traceability back to SWE.1 requirement items)
