@@ -61,6 +61,7 @@ pages:
       - "tools/gen_func_docs.py"
       - "tools/gen_coverage_report.py"
       - "tools/gen_integration_coverage_report.py"
+      - "tools/gen_misra_report.py"
       - "CMakeLists.txt"
     refs:
       - main
@@ -72,6 +73,8 @@ pages:
     - python3 tools/gen_coverage_report.py
     # 編譯 integrated_test、執行、產生 Coverage 報告
     - python3 tools/gen_integration_coverage_report.py
+    # 執行 MISRA C 2012 靜態分析並產生報告
+    - python3 tools/gen_misra_report.py
     # 使用 mkdocs 建立 HTML，PDF 外掛會在背景自動生成整份文件的 PDF
     - mkdocs build --site-dir public
   artifacts:

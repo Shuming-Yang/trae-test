@@ -44,6 +44,7 @@ nav:
       - 简体中文: 05_software_integration_test/integrated_test_cn.md
       - 繁體中文: 05_software_integration_test/integrated_test_tw.md
       - Coverage Report: 05_software_integration_test/coverage_report.md
+      - MISRA Report: 05_software_integration_test/misra_report.md
 
 # ==========================================
 # Theme: Material
