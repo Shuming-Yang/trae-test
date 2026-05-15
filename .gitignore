@@ -19,5 +19,8 @@ README.pdf
 # Only ignore generated detail pages; index.md is committed as placeholder
 docs/03_software_detailed_design/auto_generated/func_*.md
 
+# Auto-generated coverage reports (CI pipeline)
+docs/04_software_unit_verification/coverage/
+
 # include files
 # \!build/*.dll

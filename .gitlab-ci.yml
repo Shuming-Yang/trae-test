@@ -59,13 +59,16 @@ pages:
       - "mkdocs.yml"
       - "tools/gen_module_graph.py"
       - "tools/gen_func_docs.py"
+      - "tools/gen_coverage_report.py"
+      - "CMakeLists.txt"
     refs:
       - main
       - master
   script:
-    # - mkdir -p docs
     # 自動生成 SWE.3 函式文件與流程圖
     - python3 tools/gen_func_docs.py
+    # 編譯 unit_test、執行、產生 Coverage 報告
+    - python3 tools/gen_coverage_report.py
     # 使用 mkdocs 建立 HTML，PDF 外掛會在背景自動生成整份文件的 PDF
     - mkdocs build --site-dir public
   artifacts:
