@@ -32,6 +32,7 @@ nav:
       - English: 03_software_detailed_design/software_design_en.md
       - 简体中文: 03_software_detailed_design/software_design_cn.md
       - 繁體中文: 03_software_detailed_design/software_design_tw.md
+      - Function Details (Auto-Generated): 03_software_detailed_design/auto_generated/index.md
   - SWE.4 Software Unit Verification:
       - English: 04_software_unit_verification/unit_test_en.md
       - 简体中文: 04_software_unit_verification/unit_test_cn.md

@@ -15,5 +15,9 @@
 README.pdf
 **/report*.html
 
+# Auto-generated documentation (CI pipeline)
+# Only ignore generated detail pages; index.md is committed as placeholder
+docs/03_software_detailed_design/auto_generated/func_*.md
+
 # include files
 # \!build/*.dll

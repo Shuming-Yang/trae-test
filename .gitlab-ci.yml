@@ -58,6 +58,7 @@ pages:
       - "docs/**/*"
       - "mkdocs.yml"
       - "tools/gen_module_graph.py"
+      - "tools/gen_func_docs.py"
     refs:
       - main
       - master
@@ -67,6 +68,8 @@ pages:
     # - python3 generate_docs.py
     # 執行放置在 tools/ 下的分析腳本
     # - python3 tools/gen_module_graph.py
+    # 自動生成 SWE.3 函式文件與流程圖
+    - python3 tools/gen_func_docs.py
     # 使用 mkdocs 建立 HTML，PDF 外掛會在背景自動生成整份文件的 PDF
     - mkdocs build --site-dir public
   artifacts:
