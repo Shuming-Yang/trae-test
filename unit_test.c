@@ -79,6 +79,16 @@ static int test_exception_multiple_calls(void) {
     return 0;
 }
 
+static int test_exception_count_increment(void) {
+    UT_ASSERT_EQ(exception_get_count(), 0, "UT_02_03: initial exception_count should be 0");
+    exception_irq_handler();
+    UT_ASSERT_EQ(exception_get_count(), 1, "UT_02_03: exception_count should be 1 after one call");
+    exception_irq_handler();
+    exception_irq_handler();
+    UT_ASSERT_EQ(exception_get_count(), 3, "UT_02_03: exception_count should be 3 after three calls");
+    return 0;
+}
+
 /* ================================================================
  * UT_03: irq_trigger
  * ================================================================ */
@@ -159,6 +169,13 @@ static int test_handler_clears_pending(void) {
     irq_trigger(0);
     irq_handler(0);
     UT_ASSERT_HEX_EQ(irq_get_pending(), 0, "UT_04_04: pending should be 0 after handler");
+    return 0;
+}
+
+static int test_handler_invalid_irq(void) {
+    uint32_t before = irq_get_pending();
+    irq_handler(99);
+    UT_ASSERT(1, "UT_04_05: irq_handler(99) should not crash (default case)");
     return 0;
 }
 
@@ -248,6 +265,15 @@ static int test_get_pending_after_trigger(void) {
     irq_reset_all();
     irq_trigger(7);
     UT_ASSERT_HEX_EQ(irq_get_pending(), 0x00000080, "UT_07_03: pending after trigger IRQ7");
+    return 0;
+}
+
+static int test_get_tick_nonzero(void) {
+    irq_reset_all();
+    tick_irq_handler();
+    tick_irq_handler();
+    tick_irq_handler();
+    UT_ASSERT_EQ(irq_get_tick(), 3, "UT_07_04: tick should be 3 after three tick_irq_handler calls");
     return 0;
 }
 
@@ -366,6 +392,7 @@ int run_all_unit_tests(void) {
     printf("\n[UT_02] exception_irq_handler:\n");
     RUN_TEST(test_exception_no_crash);
     RUN_TEST(test_exception_multiple_calls);
+    RUN_TEST(test_exception_count_increment);
 
     printf("\n[UT_03] irq_trigger:\n");
     RUN_TEST(test_trigger_irq0);
@@ -381,6 +408,7 @@ int run_all_unit_tests(void) {
     RUN_TEST(test_handler_irq5);
     RUN_TEST(test_handler_irq31);
     RUN_TEST(test_handler_clears_pending);
+    RUN_TEST(test_handler_invalid_irq);
 
     printf("\n[UT_05] irq_process_all:\n");
     RUN_TEST(test_process_all_empty);
@@ -397,6 +425,7 @@ int run_all_unit_tests(void) {
     RUN_TEST(test_get_pending_initial);
     RUN_TEST(test_get_tick_initial);
     RUN_TEST(test_get_pending_after_trigger);
+    RUN_TEST(test_get_tick_nonzero);
 
     printf("\n[UT_08] irq_trigger_raw:\n");
     RUN_TEST(test_trigger_raw_single_bit);

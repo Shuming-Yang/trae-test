@@ -19,6 +19,7 @@
 /* Function declarations */
 void tick_irq_handler(void);
 void exception_irq_handler(void);
+unsigned int exception_get_count(void);
 
 void irq_trigger(unsigned int irq_num);
 void irq_trigger_raw(uint32_t mask);

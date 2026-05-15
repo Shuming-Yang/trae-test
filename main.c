@@ -15,6 +15,7 @@ void (*_rom_except_int)(void) = 0;
 
 static uint32_t irq_pending = 0;
 static unsigned int g_tick_count = 0;
+static unsigned int exception_count = 0;
 
 #define TICK_PRINTF(fmt, ...) printf("[tick: %05u] " fmt, g_tick_count, ##__VA_ARGS__)
 
@@ -35,7 +36,6 @@ void tick_irq_handler(void) {
  * @retval type=[N/A] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
  */
 void exception_irq_handler(void) {
-    static unsigned int exception_count = 0;
     exception_count++;
 }
 
@@ -226,6 +226,15 @@ unsigned int irq_get_tick(void) {
 void irq_reset_all(void) {
     irq_pending = 0;
     g_tick_count = 0;
+    exception_count = 0;
+}
+
+/**
+ * @brief Get current exception count value (for test access)
+ * @retval type=[unsigned int] current exception_count value
+ */
+unsigned int exception_get_count(void) {
+    return exception_count;
 }
 
 /**
