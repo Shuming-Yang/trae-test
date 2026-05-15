@@ -14,7 +14,7 @@ extra_css:
   - stylesheets/extra.css
 extra_javascript:
   - javascripts/lang-switcher.js
-  - https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js
+  - https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js
 
 # ==========================================
 # Navigation (ASPICE V-Model)
