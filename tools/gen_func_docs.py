@@ -242,6 +242,9 @@ class FlowchartGenerator:
 
     def _add_node(self, label: str, shape: str = "process") -> str:
         nid = self._new_id()
+        # Use a single space for empty labels to keep Mermaid happy
+        if not label or not label.strip():
+            label = " "
         escaped = label.replace('"', "'").replace("\n", " ")
         if shape == "decision":
             self.nodes.append(f'    {nid}{{{{"{escaped}"}}}}')
@@ -362,7 +365,7 @@ class FlowchartGenerator:
                     else_exit = decision_id
 
                 # Merge point
-                merge_id = self._add_node("", "process")
+                merge_id = self._add_node("Continue", "process")
                 if if_exit and if_exit != decision_id:
                     self._add_edge(if_exit, merge_id)
                 if else_exit and else_exit != decision_id:
@@ -390,7 +393,7 @@ class FlowchartGenerator:
                         self._add_edge(body_exit, loop_id)
 
                 # Exit path after loop
-                exit_id = self._add_node("", "process")
+                exit_id = self._add_node("Loop End", "process")
                 self._add_edge(loop_id, exit_id)
                 current_id = exit_id
                 i = for_end + 1
@@ -414,7 +417,7 @@ class FlowchartGenerator:
                         self._add_edge(body_exit, loop_id)
 
                 # Exit path after loop
-                exit_id = self._add_node("", "process")
+                exit_id = self._add_node("Loop End", "process")
                 self._add_edge(loop_id, exit_id)
                 current_id = exit_id
                 i = while_end + 1
