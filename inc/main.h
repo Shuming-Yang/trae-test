@@ -12,7 +12,6 @@
 
 #include <stdio.h>
 #include <stdint.h>
-#include <string.h>
 
 #define IRQ_COUNT   32
 
@@ -38,7 +37,7 @@ void exception_irq_handler(void);
  * @brief Get current exception count value (for test access)
  * @retval type=[unsigned int] current exception_count value
  */
-unsigned int exception_get_count(void);
+uint32_t exception_get_count(void);
 
 /**
  * @brief Trigger a specific IRQ by setting the corresponding bit in irq_pending
@@ -46,7 +45,7 @@ unsigned int exception_get_count(void);
  * @param [in] irq_num type=[unsigned int] R=[0-31] P=[0-31] N=[N/A] D=[IRQ number to trigger]
  * @retval type=[void] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
  */
-void irq_trigger(unsigned int irq_num);
+void irq_trigger(uint32_t irq_num);
 
 /**
  * @brief Trigger multiple IRQs by raw mask (for h-mode / test use)
@@ -61,7 +60,7 @@ void irq_trigger_raw(uint32_t mask);
  * @param [in] irq_num type=[unsigned int] R=[0-31] P=[0-31] N=[N/A] D=[IRQ number to handle]
  * @retval type=[void] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
  */
-void irq_handler(unsigned int irq_num);
+void irq_handler(uint32_t irq_num);
 
 /**
  * @brief Process all pending IRQs from lowest to highest priority (IRQ0 = highest)
@@ -81,7 +80,7 @@ uint32_t irq_get_pending(void);
  * @brief Get current tick count value (for test access)
  * @retval type=[unsigned int] current g_tick_count value
  */
-unsigned int irq_get_tick(void);
+uint32_t irq_get_tick(void);
 
 /**
  * @brief Reset all IRQ state to initial values (for test setup)

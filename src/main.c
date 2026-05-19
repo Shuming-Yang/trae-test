@@ -8,14 +8,15 @@
  */
 
 #include "main.h"
+#include <string.h>
 
 /* Global function pointers for exception handlers (referenced in start.s) */
-void (*_rom_except_tick)(void) = 0;
-void (*_rom_except_int)(void) = 0;
+void (*_rom_except_tick)(void) = NULL;
+void (*_rom_except_int)(void) = NULL;
 
 static uint32_t irq_pending = 0;
-static unsigned int g_tick_count = 0;
-static unsigned int exception_count = 0;
+static uint32_t g_tick_count = 0U;
+static uint32_t exception_count = 0U;
 
 #define TICK_PRINTF(fmt, ...) printf("[tick: %05u] " fmt, g_tick_count, ##__VA_ARGS__)
 
@@ -45,7 +46,7 @@ void exception_irq_handler(void) {
  * @param [in] irq_num type=[unsigned int] R=[0-31] P=[0-31] N=[N/A] D=[IRQ number to trigger]
  * @retval type=[void] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
  */
-void irq_trigger(unsigned int irq_num) {
+void irq_trigger(uint32_t irq_num) {
     if (irq_num < IRQ_COUNT) {
         irq_pending |= (1U << irq_num);
         TICK_PRINTF("[IRQ] IRQ%u triggered (pending: 0x%08X)\n", irq_num, irq_pending);
@@ -70,7 +71,7 @@ void irq_trigger_raw(uint32_t mask) {
  * @param [in] irq_num type=[unsigned int] R=[0-31] P=[0-31] N=[N/A] D=[IRQ number to handle]
  * @retval type=[void] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
  */
-void irq_handler(unsigned int irq_num) {
+void irq_handler(uint32_t irq_num) {
     TICK_PRINTF("  -> Handling IRQ%u: ", irq_num);
 
     switch (irq_num) {
@@ -187,9 +188,9 @@ void irq_handler(unsigned int irq_num) {
  * @retval type=[void] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
  */
 void irq_process_all(void) {
-    unsigned int i;
+    uint32_t i;
 
-    if (irq_pending == 0) {
+    if (irq_pending == 0U) {
         return;
     }
 
@@ -216,7 +217,7 @@ uint32_t irq_get_pending(void) {
  * @brief Get current tick count value (for test access)
  * @retval type=[unsigned int] current g_tick_count value
  */
-unsigned int irq_get_tick(void) {
+uint32_t irq_get_tick(void) {
     return g_tick_count;
 }
 
@@ -233,7 +234,7 @@ void irq_reset_all(void) {
  * @brief Get current exception count value (for test access)
  * @retval type=[unsigned int] current exception_count value
  */
-unsigned int exception_get_count(void) {
+uint32_t exception_get_count(void) {
     return exception_count;
 }
 
@@ -245,10 +246,10 @@ unsigned int exception_get_count(void) {
  * @retval type=[int] R=[0-0xff] P=[N/A] N=[N/A] D=[exit status]
  */
 #ifndef TEST_BUILD
-int main(int argc, char* argv[]) {
+int32_t main(int32_t argc, char* argv[]) {
     char line[64];
-    int input;
-    unsigned int hex_val;
+    int32_t input;
+    uint32_t hex_val;
 
     _rom_except_tick = tick_irq_handler;
     _rom_except_int = exception_irq_handler;
@@ -281,8 +282,8 @@ int main(int argc, char* argv[]) {
         }
 
         if (line[0] == 'b' || line[0] == 'B') {
-            if (sscanf(line + 1, "%d", &input) == 1 && input >= 0 && input < (int)IRQ_COUNT) {
-                irq_trigger((unsigned int)input);
+            if (sscanf(line + 1, "%d", &input) == 1 && input >= 0 && input < IRQ_COUNT) {
+                irq_trigger((uint32_t)input);
                 irq_process_all();
             } else {
                 TICK_PRINTF("Invalid bit mode. Usage: b<0-31> (e.g. b1)\n");
@@ -299,7 +300,7 @@ int main(int argc, char* argv[]) {
             if (input == 0) {
                 irq_process_all();
             } else if (input >= 1 && input <= 32) {
-                irq_trigger((unsigned int)(input - 1));
+                irq_trigger((uint32_t)(input - 1));
                 irq_process_all();
             } else {
                 TICK_PRINTF("Invalid IRQ number: %d (valid range: 1-32)\n", input);
