@@ -11,6 +11,7 @@
 #define INTEGRATED_TEST_H
 
 #include <stdio.h>
+#include <stdint.h>
 #include <string.h>
 
 #define IT_ASSERT(cond, msg) do { \
@@ -23,7 +24,7 @@
 #define IT_ASSERT_EQ(a, b, msg) do { \
     if ((a) != (b)) { \
         printf("  [FAIL] %s: expected %u, got %u (%s:%d)\n", \
-               msg, (unsigned int)(b), (unsigned int)(a), __FILE__, __LINE__); \
+               msg, (uint32_t)(b), (uint32_t)(a), __FILE__, __LINE__); \
         return 1; \
     } \
 } while (0)
@@ -31,7 +32,7 @@
 #define IT_ASSERT_HEX_EQ(a, b, msg) do { \
     if ((a) != (b)) { \
         printf("  [FAIL] %s: expected 0x%08X, got 0x%08X (%s:%d)\n", \
-               msg, (unsigned int)(b), (unsigned int)(a), __FILE__, __LINE__); \
+               msg, (uint32_t)(b), (uint32_t)(a), __FILE__, __LINE__); \
         return 1; \
     } \
 } while (0)
@@ -42,6 +43,6 @@
  * @param [in] N/A type=[N/A] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
  * @retval type=[int] R=[0|1] P=[0=all passed, 1=some failed] N=[N/A] D=[exit code: 0 on success, 1 on failure]
  */
-int run_all_integrated_tests(void);
+int32_t run_all_integrated_tests(void);
 
 #endif /* INTEGRATED_TEST_H */

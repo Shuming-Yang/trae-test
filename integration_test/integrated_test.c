@@ -10,8 +10,8 @@
 #include "integrated_test.h"
 #include "main.h"
 
-static unsigned int g_it_passed = 0;
-static unsigned int g_it_failed = 0;
+static uint32_t g_it_passed = 0U;
+static uint32_t g_it_failed = 0U;
 
 #define RUN_TEST(name) do { \
     printf("  Running %s...\n", #name); \
@@ -29,9 +29,9 @@ static unsigned int g_it_failed = 0;
  * @param line Input string (without trailing newline for simplicity)
  * @return 1 if "exit" was processed, 0 otherwise
  */
-static int simulate_input(const char *line) {
-    int input;
-    unsigned int hex_val;
+static int32_t simulate_input(const char *line) {
+    int32_t input;
+    uint32_t hex_val;
     char buf[64];
 
     strncpy(buf, line, sizeof(buf) - 1);
@@ -42,8 +42,8 @@ static int simulate_input(const char *line) {
     }
 
     if (buf[0] == 'b' || buf[0] == 'B') {
-        if (sscanf(buf + 1, "%d", &input) == 1 && input >= 0 && input < (int)IRQ_COUNT) {
-            irq_trigger((unsigned int)input);
+        if (sscanf(buf + 1, "%d", &input) == 1 && input >= 0 && input < IRQ_COUNT) {
+            irq_trigger((uint32_t)input);
             irq_process_all();
         }
     } else if (buf[0] == 'h' || buf[0] == 'H') {
@@ -55,7 +55,7 @@ static int simulate_input(const char *line) {
         if (input == 0) {
             irq_process_all();
         } else if (input >= 1 && input <= 32) {
-            irq_trigger((unsigned int)(input - 1));
+            irq_trigger((uint32_t)(input - 1));
             irq_process_all();
         }
     }
@@ -350,7 +350,7 @@ static int test_tick_initial_zero(void) {
  * @retval type=[int] R=[0] P=[0] N=[N/A] D=[always returns 0 on success]
  */
 static int test_tick_irq0_increment(void) {
-    unsigned int before = irq_get_tick();
+    uint32_t before = irq_get_tick();
     irq_trigger(0);
     irq_process_all();
     IT_ASSERT_EQ(irq_get_tick(), before + 1, "IT_05_02: IRQ0 handler increments tick by 1");
@@ -364,7 +364,7 @@ static int test_tick_irq0_increment(void) {
  * @retval type=[int] R=[0] P=[0] N=[N/A] D=[always returns 0 on success]
  */
 static int test_tick_non_irq0_no_change(void) {
-    unsigned int before = irq_get_tick();
+    uint32_t before = irq_get_tick();
     irq_trigger(5);
     irq_process_all();
     IT_ASSERT_EQ(irq_get_tick(), before, "IT_05_03: non-IRQ0 should not change tick");
@@ -378,7 +378,7 @@ static int test_tick_non_irq0_no_change(void) {
  * @retval type=[int] R=[0] P=[0] N=[N/A] D=[always returns 0 on success]
  */
 static int test_tick_multi_irq0(void) {
-    unsigned int before = irq_get_tick();
+    uint32_t before = irq_get_tick();
     irq_trigger(0);
     irq_process_all();
     irq_trigger(0);
@@ -400,7 +400,7 @@ static int test_tick_multi_irq0(void) {
  * @retval type=[int] R=[0] P=[0] N=[N/A] D=[always returns 0 on success]
  */
 static int test_exit_returns_one(void) {
-    int result = simulate_input("exit");
+    int32_t result = simulate_input("exit");
     IT_ASSERT_EQ(result, 1, "IT_06_01: 'exit' should return 1");
     return 0;
 }
@@ -451,7 +451,7 @@ static int test_full_flow(void) {
     simulate_input("h3");
     IT_ASSERT_HEX_EQ(irq_get_pending(), 0, "IT_07_01: step3 'h3' -> IRQ0,1 processed");
 
-    int result = simulate_input("exit");
+    int32_t result = simulate_input("exit");
     IT_ASSERT_EQ(result, 1, "IT_07_01: step4 'exit' -> returns 1");
 
     return 0;
@@ -467,9 +467,9 @@ static int test_full_flow(void) {
  * @param [in] N/A type=[N/A] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
  * @retval type=[int] R=[0|1] P=[0=all passed, 1=some failed] N=[N/A] D=[exit code: 0 on success, 1 on failure]
  */
-int run_all_integrated_tests(void) {
-    g_it_passed = 0;
-    g_it_failed = 0;
+int32_t run_all_integrated_tests(void) {
+    g_it_passed = 0U;
+    g_it_failed = 0U;
 
     printf("\n========== Integration Tests ==========\n\n");
 
@@ -530,6 +530,6 @@ int run_all_integrated_tests(void) {
  * @param [in] N/A type=[N/A] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
  * @retval type=[int] R=[0|1] P=[0=all passed, 1=some failed] N=[N/A] D=[exit code from run_all_integrated_tests]
  */
-int main(void) {
+int32_t main(void) {
     return run_all_integrated_tests();
 }

@@ -10,8 +10,8 @@
 #include "unit_test.h"
 #include "main.h"
 
-static unsigned int g_ut_passed = 0;
-static unsigned int g_ut_failed = 0;
+static uint32_t g_ut_passed = 0U;
+static uint32_t g_ut_failed = 0U;
 
 #define RUN_TEST(name) do { \
     printf("  Running %s...\n", #name); \
@@ -344,7 +344,7 @@ static int test_process_all_multiple(void) {
  * @retval type=[int] R=[0] P=[0] N=[N/A] D=[always returns 0 on success]
  */
 static int test_process_all_full(void) {
-    unsigned int i;
+    uint32_t i;
     for (i = 0; i < IRQ_COUNT; i++) {
         irq_trigger(i);
     }
@@ -635,9 +635,9 @@ static int test_process_all_priority_order(void) {
  * @param [in] N/A type=[N/A] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
  * @retval type=[int] R=[0|1] P=[0=all passed, 1=some failed] N=[N/A] D=[exit code: 0 on success, 1 on failure]
  */
-int run_all_unit_tests(void) {
-    g_ut_passed = 0;
-    g_ut_failed = 0;
+int32_t run_all_unit_tests(void) {
+    g_ut_passed = 0U;
+    g_ut_failed = 0U;
 
     printf("\n========== Unit Tests ==========\n\n");
 
@@ -718,6 +718,6 @@ int run_all_unit_tests(void) {
  * @param [in] N/A type=[N/A] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
  * @retval type=[int] R=[0|1] P=[0=all passed, 1=some failed] N=[N/A] D=[exit code from run_all_unit_tests]
  */
-int main(void) {
+int32_t main(void) {
     return run_all_unit_tests();
 }
