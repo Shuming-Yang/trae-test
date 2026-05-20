@@ -8,6 +8,25 @@
 
 <!-- REVIEW_ENTRIES_START -->
 
+## [2026-05-20] Review #4 — src/main.c
+
+**Review Date**: 2026-05-20
+
+### Issues
+
+🟢 **No new issues.** All 13 historical issues across Review #1–#3 are fixed.
+Full RMW/read access matrix for `irq_pending`, `g_tick_count`, `exception_count` verified clean.
+
+### Refactoring Suggestions
+
+| # | Suggestion | Benefit |
+|---|-----------|---------|
+| E | ✅ Completed — snapshot pattern applied in `irq_trigger()`, `irq_trigger_raw()`, `main()` h-mode | |
+| D | Wrap critical sections with CRITICAL_SECTION_BEGIN/END macros | Makes intent explicit; prevents forgetting __enable_irq() |
+
+---
+
+
 ## [2026-05-20] Review #3 — src/main.c
 
 **Review Date**: 2026-05-20
