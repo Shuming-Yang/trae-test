@@ -25,12 +25,22 @@ FW_STATIC uint32_t irq_pending = 0U;
 FW_STATIC uint32_t g_tick_count = 0U;
 FW_STATIC uint32_t exception_count = 0U;
 
+/**
+ * @brief Debug logging wrapper: prefix output with tick timestamp, then delegate to printf / vprintf
+ * @remark R17.1 deviation: va_list / va_start / va_end are required for variadic debug output.
+ *         This function serves CLI interactive development only and is excluded from production firmware.
+ * @param [in] fmt type=[const char*] R=[N/A] P=[N/A] N=[N/A] D=[printf-compatible format string]
+ * @param [in] ... type=[variable] R=[N/A] P=[N/A] N=[N/A] D=[variable arguments matching fmt]
+ * @retval type=[void] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
+ */
 FW_STATIC void tick_printf(const char *fmt, ...) {
+    // cppcheck-suppress-begin misra-c2012-17.1
     va_list args;
     (void)printf("[tick: %05u] ", g_tick_count);
     va_start(args, fmt);
     (void)vprintf(fmt, args);
     va_end(args);
+    // cppcheck-suppress-end misra-c2012-17.1
 }
 
 /**
