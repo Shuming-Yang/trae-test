@@ -77,8 +77,7 @@ pages:
     - python3 tools/gen_integration_coverage_report.py
     # 執行 MISRA C 2012 靜態分析並產生報告
     - python3 tools/gen_misra_report.py
-    # 安裝 lizard 並產生程式碼度量報告 (Cyclomatic Complexity, NLOC, etc.)
-    - pip3 install lizard
+    # 產生程式碼度量報告 (Cyclomatic Complexity, NLOC, Parameters)
     - python3 tools/run_lizard.py
     # 偵測 src/ 變動並產生 Code Review 紀錄入口
     - python3 tools/gen_code_review.py
