@@ -7,4 +7,30 @@
 ---
 
 <!-- REVIEW_ENTRIES_START -->
+
+## [2026-05-20] Review — src/main.c
+
+**Review Date**: 2026-05-20
+
+### Issues
+
+| # | Severity | File | Line(s) | Category | Issue | Status | Fix Date |
+|---|----------|------|---------|----------|-------|--------|----------|
+| 1 | 🟡 Warning | src/main.c | L25-L26 | Static Analysis | rom_except_* initialized to NULL — premature ISR trigger causes HardFault | pending | — |
+| 2 | 🟡 Warning | src/main.c | L313, L322 | Static Analysis | sscanf format/type mismatch (%x→uint32_t*, %d→int32_t*) — UB on non-ILP32 platforms | pending | — |
+| 3 | 🟡 Warning | src/main.c | L211 | Static Analysis | irq_handler() missing boundary check before 1U << irq_num (UB when irq_num ≥ 32) | pending | — |
+| 4 | 🟡 Warning | src/main.c | L59-L61 | Static Analysis | g_tick_count++ is non-atomic (LDR→ADD→STR) — may lose counts under nested ISRs | pending | — |
+| 5 | 🔵 Info | src/main.c | L286 | Code Quality | CLI buffer char line[64] uses magic number without named constant | pending | — |
+| 6 | 🟡 Warning | src/main.c | L103-L209 | Maintainability | 107-line switch-case in irq_handler() — high maintenance cost, duplicates tick_printf patterns 32× | pending | — |
+
+### Refactoring Suggestions
+
+| # | Suggestion | Lines Saved | Benefits |
+|---|-----------|:----------:|----------|
+| A | Replace switch-case with IRQ name lookup table + boundary check | 107→57 (−47%) | Fixes #3+#6; O(1) maintenance per new IRQ |
+| B | Use intermediate variables for sscanf to match correct format types | 0 | Eliminates cross-platform UB; zero runtime cost |
+| C | Initialize rom_except_* function pointers at declaration site | -2 | Eliminates NULL-dereference window before main() assignment |
+
+---
+
 <!-- REVIEW_ENTRIES_END -->
