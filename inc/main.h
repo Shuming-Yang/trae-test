@@ -77,15 +77,59 @@ void irq_process_all(void);
  */
 #ifdef TEST_BUILD
 
+/**
+ * @brief IRQ pending register: each bit represents a triggered-but-unhandled IRQ
+ */
 extern uint32_t irq_pending;
+
+/**
+ * @brief System tick counter, incremented on each tick_irq_handler() call
+ */
 extern uint32_t g_tick_count;
+
+/**
+ * @brief External exception interrupt counter
+ */
 extern uint32_t exception_count;
 
+/**
+ * @brief Debug logging wrapper: prefix output with tick timestamp, then delegate to printf / vprintf
+ * @remark R17.1 deviation: va_list / va_start / va_end are required for variadic debug output.
+ *         This function serves CLI interactive development only and is excluded from production firmware.
+ * @param [in] fmt type=[const char*] R=[N/A] P=[N/A] N=[N/A] D=[printf-compatible format string]
+ * @param [in] ... type=[variable] R=[N/A] P=[N/A] N=[N/A] D=[variable arguments matching fmt]
+ * @retval type=[void] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
+ */
 FW_STATIC void tick_printf(const char *fmt, ...);
+
+/**
+ * @brief Get current exception count value (for test access)
+ * @retval type=[uint32_t] current exception_count value
+ */
 FW_STATIC uint32_t exception_get_count(void);
+
+/**
+ * @brief Trigger multiple IRQs by raw mask (for h-mode / test use)
+ * @param [in] mask type=[uint32_t] R=[0-0xFFFFFFFF] P=[N/A] N=[N/A] D=[bitmask of IRQs to trigger]
+ * @retval type=[void] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
+ */
 FW_STATIC void irq_trigger_raw(uint32_t mask);
+
+/**
+ * @brief Get current IRQ pending register value (for test access)
+ * @retval type=[uint32_t] current irq_pending value
+ */
 FW_STATIC uint32_t irq_get_pending(void);
+
+/**
+ * @brief Get current tick count value (for test access)
+ * @retval type=[uint32_t] current g_tick_count value
+ */
 FW_STATIC uint32_t irq_get_tick(void);
+
+/**
+ * @brief Reset all IRQ state to initial values (for test setup)
+ */
 FW_STATIC void irq_reset_all(void);
 
 /**
