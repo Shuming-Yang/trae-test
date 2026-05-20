@@ -154,6 +154,8 @@ def main():
     ] + inc_paths + [
         "--enable=all",
         "--inline-suppr",
+        "--suppress=unusedFunction",
+        "--suppress=missingIncludeSystem",
         "--xml",
         "--xml-version=2",
         f"--addon={config_path}",
