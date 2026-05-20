@@ -191,6 +191,29 @@ def main():
         f"--source-dir={PROJECT_ROOT}",
     ])
 
+    # Remove checkers report (not useful in MISRA context)
+    checkers_html = os.path.join(OUTPUT_DIR, "checkers_report.html")
+    if os.path.exists(checkers_html):
+        os.remove(checkers_html)
+        print("  Removed: checkers_report.html")
+
+    index_html = os.path.join(OUTPUT_DIR, "index.html")
+    if os.path.exists(index_html):
+        with open(index_html, "r", encoding="utf-8") as f:
+            html = f.read()
+
+        # Remove the <li> link to checkers_report.html
+        html = re.sub(
+            r'<li>.*?checkers_report\.html.*?</li>',
+            '',
+            html,
+            flags=re.DOTALL
+        )
+
+        with open(index_html, "w", encoding="utf-8") as f:
+            f.write(html)
+        print("  Cleaned: index.html (removed checkers report link)")
+
     # Generate summary snippet
     timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
     summary_md = (
