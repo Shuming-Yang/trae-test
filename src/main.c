@@ -15,7 +15,9 @@
  * fflush, fgets, and sscanf used in the CLI loop.
  */
 #include <stdarg.h>
+// cppcheck-suppress-begin misra-c2012-21.6
 #include <stdio.h>
+// cppcheck-suppress-end misra-c2012-21.6
 
 /* Global function pointers for exception handlers (referenced in start.s) */
 void (*rom_except_tick)(void) = NULL;
