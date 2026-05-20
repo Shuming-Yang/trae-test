@@ -61,7 +61,7 @@ void exception_irq_handler(void) {
  */
 void irq_trigger(uint32_t irq_num) {
     if (irq_num < IRQ_COUNT) {
-        irq_pending |= (1U << irq_num);
+        irq_pending |= ((uint32_t)1U << irq_num);
         tick_printf("[IRQ] IRQ%u triggered (pending: 0x%08X)\n", irq_num, irq_pending);
     } else {
         tick_printf("[IRQ] Invalid IRQ number: %u (valid range: 0-%u)\n", irq_num, IRQ_COUNT - 1U);
@@ -191,7 +191,7 @@ void irq_handler(uint32_t irq_num) {
         break;
     }
 
-    irq_pending &= ~(1U << irq_num);
+    irq_pending &= ~((uint32_t)1U << irq_num);
 }
 
 /**
@@ -205,7 +205,7 @@ void irq_process_all(void) {
         tick_printf("\n=== Processing pending IRQs (0x%08X) ===\n", irq_pending);
 
         for (uint32_t i = 0U; i < IRQ_COUNT; i++) {
-            if ((irq_pending & (1U << i)) != 0U) {
+            if ((irq_pending & ((uint32_t)1U << i)) != 0U) {
                 irq_handler(i);
             }
         }
