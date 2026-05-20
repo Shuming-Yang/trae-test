@@ -37,6 +37,20 @@ extern void (*rom_except_int)(void);
  */
 
 /**
+ * @brief Disable global interrupts (platform stub — replace with arch-specific intrinsic)
+ * @remark Placeholder for real hardware; no-op in simulator builds.
+ * @retval type=[void] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
+ */
+void __disable_irq(void);
+
+/**
+ * @brief Enable global interrupts (platform stub — replace with arch-specific intrinsic)
+ * @remark Placeholder for real hardware; no-op in simulator builds.
+ * @retval type=[void] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
+ */
+void __enable_irq(void);
+
+/**
  * @brief Tick interrupt handler function
  * @remark Test Criteria: Function executed on tick interrupt.
  * @param [in] N/A type=[N/A] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
