@@ -61,14 +61,6 @@ void exception_irq_handler(void);
 void irq_trigger(uint32_t irq_num);
 
 /**
- * @brief IRQ handler: process a specific IRQ and clear its pending bit
- * @remark Test Criteria: IRQ handled and pending bit cleared.
- * @param [in] irq_num type=[unsigned int] R=[0-31] P=[0-31] N=[N/A] D=[IRQ number to handle]
- * @retval type=[void] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
- */
-void irq_handler(uint32_t irq_num);
-
-/**
  * @brief Process all pending IRQs from lowest to highest priority (IRQ0 = highest)
  * @remark Test Criteria: All pending IRQs processed in priority order.
  * @param [in] N/A type=[N/A] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
@@ -96,6 +88,13 @@ FW_STATIC uint32_t irq_get_pending(void);
 FW_STATIC uint32_t irq_get_tick(void);
 FW_STATIC void irq_reset_all(void);
 
+/**
+ * @brief IRQ handler: process a specific IRQ and clear its pending bit
+ * @remark Test Criteria: IRQ handled and pending bit cleared.
+ * @param [in] irq_num type=[unsigned int] R=[0-31] P=[0-31] N=[N/A] D=[IRQ number to handle]
+ * @retval type=[void] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
+ */
+FW_STATIC void irq_handler(uint32_t irq_num);
 #endif /* TEST_BUILD */
 
 #endif /* MAIN_H */

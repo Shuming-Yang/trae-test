@@ -94,7 +94,7 @@ FW_STATIC void irq_trigger_raw(uint32_t mask) {
  * @param [in] irq_num type=[unsigned int] R=[0-31] P=[0-31] N=[N/A] D=[IRQ number to handle]
  * @retval type=[void] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
  */
-void irq_handler(uint32_t irq_num) {
+FW_STATIC void irq_handler(uint32_t irq_num) {
     tick_printf("  -> Handling IRQ%u: ", irq_num);
 
     switch (irq_num) {
