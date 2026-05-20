@@ -16,10 +16,10 @@
 
 | # | Severity | File | Line(s) | Category | Issue | Status | Fix Date |
 |---|----------|------|---------|----------|-------|--------|----------|
-| 1 | 🟡 Warning | src/main.c | L107 | Static Analysis | irq_trigger(): irq_pending \|= (1U<<irq_num) without __disable_irq() — race with ISR bit-clear losing concurrent updates | pending | — |
-| 2 | 🟡 Warning | src/main.c | L112 | Static Analysis | irq_trigger_raw(): irq_pending \|= mask without __disable_irq() — same race as #1 | pending | — |
-| 3 | 🟡 Warning | src/main.c | L233-L237 | Static Analysis | irq_reset_all(): 3 global writes without __disable_irq() — ISR firing mid-reset leaves partially-reset state | pending | — |
-| 4 | 🔵 Info | src/main.c | L48 | Code Quality | tick_printf() reads g_tick_count without __disable_irq() — displayed tick may lag 1 behind | pending | — |
+| 1 | 🟡 Warning | src/main.c | L107 | Static Analysis | irq_trigger(): irq_pending \ | **fixed** | 2026-05-20 | — |
+| 2 | 🟡 Warning | src/main.c | L112 | Static Analysis | irq_trigger_raw(): irq_pending \ | **fixed** | 2026-05-20 | — |
+| 3 | 🟡 Warning | src/main.c | L233-L237 | Static Analysis | irq_reset_all(): 3 global writes without __disable_irq() — ISR firing mid-reset leaves partially-reset state | **fixed** | 2026-05-20 |
+| 4 | 🔵 Info | src/main.c | L48 | Code Quality | tick_printf() reads g_tick_count without __disable_irq() — displayed tick may lag 1 behind | **fixed** | 2026-05-20 |
 
 ### Refactoring Suggestions
 

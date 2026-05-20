@@ -41,7 +41,9 @@ FW_STATIC uint32_t exception_count = 0U;
 FW_STATIC void tick_printf(const char *fmt, ...) {
     // cppcheck-suppress-begin misra-c2012-17.1
     va_list args;
+    __disable_irq();
     (void)printf("[tick: %05u] ", g_tick_count);
+    __enable_irq();
     va_start(args, fmt);
     (void)vprintf(fmt, args);
     va_end(args);
@@ -100,7 +102,9 @@ void exception_irq_handler(void) {
  */
 void irq_trigger(uint32_t irq_num) {
     if (irq_num < IRQ_COUNT) {
+        __disable_irq();
         irq_pending |= ((uint32_t)1U << irq_num);
+        __enable_irq();
         tick_printf("[IRQ] IRQ%u triggered (pending: 0x%08X)\n", irq_num, irq_pending);
     } else {
         tick_printf("[IRQ] Invalid IRQ number: %u (valid range: 0-%u)\n", irq_num, IRQ_COUNT - 1U);
@@ -113,7 +117,9 @@ void irq_trigger(uint32_t irq_num) {
  * @retval type=[void] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
  */
 FW_STATIC void irq_trigger_raw(uint32_t mask) {
+    __disable_irq();
     irq_pending |= mask;
+    __enable_irq();
     tick_printf("[IRQ] Raw trigger: pending = 0x%08X\n", irq_pending);
 }
 
@@ -219,9 +225,11 @@ FW_STATIC uint32_t irq_get_tick(void) {
  * @brief Reset all IRQ state to initial values (for test setup)
  */
 FW_STATIC void irq_reset_all(void) {
+    __disable_irq();
     irq_pending = 0U;
     g_tick_count = 0U;
     exception_count = 0U;
+    __enable_irq();
 }
 
 /**
