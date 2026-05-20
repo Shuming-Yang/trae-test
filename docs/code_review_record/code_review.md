@@ -16,9 +16,9 @@
 
 | # | Severity | File | Line(s) | Category | Issue | Status | Fix Date |
 |---|----------|------|---------|----------|-------|--------|----------|
-| 1 | 🟡 Warning | src/main.c | L179 | Static Analysis | irq_handler(): irq_pending &= ~(1U<<irq_num) without __disable_irq() — last unprotected RMW of irq_pending; race with irq_trigger()'s \|= | pending | — |
-| 2 | 🟡 Warning | src/main.c | L108, L122 | Code Quality | irq_trigger() / irq_trigger_raw(): tick_printf() reads irq_pending AFTER __enable_irq() — stale display if another trigger fires in between | pending | — |
-| 3 | 🔵 Info | src/main.c | L308 | Code Quality | main() h-mode: irq_pending \|= hex_val without __disable_irq() — inconsistent with irq_trigger() / irq_trigger_raw() protection pattern | pending | — |
+| 1 | 🟡 Warning | src/main.c | L179 | Static Analysis | irq_handler(): irq_pending &= ~(1U<<irq_num) without __disable_irq() — last unprotected RMW of irq_pending; race with irq_trigger()'s \ | **fixed** | 2026-05-20 | — |
+| 2 | 🟡 Warning | src/main.c | L108, L122 | Code Quality | irq_trigger() / irq_trigger_raw(): tick_printf() reads irq_pending AFTER __enable_irq() — stale display if another trigger fires in between | **fixed** | 2026-05-20 |
+| 3 | 🔵 Info | src/main.c | L308 | Code Quality | main() h-mode: irq_pending \ | **fixed** | 2026-05-20 | — |
 
 ### Refactoring Suggestions
 

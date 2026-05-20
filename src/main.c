@@ -104,8 +104,9 @@ void irq_trigger(uint32_t irq_num) {
     if (irq_num < IRQ_COUNT) {
         __disable_irq();
         irq_pending |= ((uint32_t)1U << irq_num);
+        uint32_t pending_snapshot = irq_pending;
         __enable_irq();
-        tick_printf("[IRQ] IRQ%u triggered (pending: 0x%08X)\n", irq_num, irq_pending);
+        tick_printf("[IRQ] IRQ%u triggered (pending: 0x%08X)\n", irq_num, pending_snapshot);
     } else {
         tick_printf("[IRQ] Invalid IRQ number: %u (valid range: 0-%u)\n", irq_num, IRQ_COUNT - 1U);
     }
@@ -119,8 +120,9 @@ void irq_trigger(uint32_t irq_num) {
 FW_STATIC void irq_trigger_raw(uint32_t mask) {
     __disable_irq();
     irq_pending |= mask;
+    uint32_t pending_snapshot = irq_pending;
     __enable_irq();
-    tick_printf("[IRQ] Raw trigger: pending = 0x%08X\n", irq_pending);
+    tick_printf("[IRQ] Raw trigger: pending = 0x%08X\n", pending_snapshot);
 }
 
 /**
@@ -182,7 +184,9 @@ FW_STATIC void irq_handler(uint32_t irq_num) {
         exception_irq_handler();
     }
 
+    __disable_irq();
     irq_pending &= ~((uint32_t)1U << irq_num);
+    __enable_irq();
 }
 
 /**
@@ -296,8 +300,11 @@ int32_t main(int32_t argc, char* argv[]) {
         } else if ((line[0] == 'h') || (line[0] == 'H')) {
             if (sscanf(&line[1], "%x", &hex_raw) == 1) {
                 hex_val = (uint32_t)hex_raw;
+                __disable_irq();
                 irq_pending |= hex_val;
-                tick_printf("[IRQ] Hex trigger: pending = 0x%08X\n", irq_pending);
+                uint32_t pending_snapshot = irq_pending;
+                __enable_irq();
+                tick_printf("[IRQ] Hex trigger: pending = 0x%08X\n", pending_snapshot);
                 irq_process_all();
             } else {
                 tick_printf("Invalid hex mode. Usage: h<hex> (e.g. h3, hFF)\n");
