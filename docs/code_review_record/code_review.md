@@ -29,17 +29,6 @@
 ---
 
 
-## [2026-05-20] Review — src/main.c
-
-**Review Date**: 2026-05-20
-
-### Issues
-
-*(pending — run smart-code-reviewer AI skill to populate)*
-
----
-
-
 ## [2026-05-20] Review #2 — src/main.c
 
 **Review Date**: 2026-05-20
