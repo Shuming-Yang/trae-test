@@ -12,13 +12,29 @@
 
 #include <stdint.h>
 
+/*
+ * FW_STATIC: firmware-level static modifier.
+ *   Production build: expands to 'static' (MISRA R8.7 compliant).
+ *   Test build (TEST_BUILD defined): expands to nothing, making symbols
+ *   externally visible for unit/integration test harnesses.
+ */
+#ifdef TEST_BUILD
+#define FW_STATIC
+#else
+#define FW_STATIC static
+#endif
+
 #define IRQ_COUNT   32U
 
 /* Global function pointers for exception handlers (referenced in start.s) */
 extern void (*rom_except_tick)(void);
 extern void (*rom_except_int)(void);
 
-/* Function declarations */
+/*
+ * ---------------------------------------------------------------------------
+ * Public API — always visible to all translation units
+ * ---------------------------------------------------------------------------
+ */
 
 /**
  * @brief Tick interrupt handler function
@@ -37,25 +53,12 @@ void tick_irq_handler(void);
 void exception_irq_handler(void);
 
 /**
- * @brief Get current exception count value (for test access)
- * @retval type=[unsigned int] current exception_count value
- */
-uint32_t exception_get_count(void);
-
-/**
  * @brief Trigger a specific IRQ by setting the corresponding bit in irq_pending
  * @remark Test Criteria: IRQ bit set correctly in pending register.
  * @param [in] irq_num type=[unsigned int] R=[0-31] P=[0-31] N=[N/A] D=[IRQ number to trigger]
  * @retval type=[void] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
  */
 void irq_trigger(uint32_t irq_num);
-
-/**
- * @brief Trigger multiple IRQs by raw mask (for h-mode / test use)
- * @param [in] mask type=[uint32_t] R=[0-0xFFFFFFFF] P=[N/A] N=[N/A] D=[bitmask of IRQs to trigger]
- * @retval type=[void] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
- */
-void irq_trigger_raw(uint32_t mask);
 
 /**
  * @brief IRQ handler: process a specific IRQ and clear its pending bit
@@ -73,23 +76,26 @@ void irq_handler(uint32_t irq_num);
  */
 void irq_process_all(void);
 
-/**
- * @brief Get current IRQ pending register value (for test access)
- * @retval type=[uint32_t] current irq_pending value
+/*
+ * ---------------------------------------------------------------------------
+ * Test-only declarations — visible only when TEST_BUILD is defined.
+ * In production builds these symbols have internal linkage (FW_STATIC → static)
+ * and must not appear in the public header.
+ * ---------------------------------------------------------------------------
  */
-uint32_t irq_get_pending(void);
+#ifdef TEST_BUILD
 
-/**
- * @brief Get current tick count value (for test access)
- * @retval type=[unsigned int] current g_tick_count value
- */
-uint32_t irq_get_tick(void);
+extern uint32_t irq_pending;
+extern uint32_t g_tick_count;
+extern uint32_t exception_count;
 
-/**
- * @brief Reset all IRQ state to initial values (for test setup)
- * @param [in] N/A type=[N/A] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
- * @retval type=[void] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
- */
-void irq_reset_all(void);
+FW_STATIC void tick_printf(const char *fmt, ...);
+FW_STATIC uint32_t exception_get_count(void);
+FW_STATIC void irq_trigger_raw(uint32_t mask);
+FW_STATIC uint32_t irq_get_pending(void);
+FW_STATIC uint32_t irq_get_tick(void);
+FW_STATIC void irq_reset_all(void);
+
+#endif /* TEST_BUILD */
 
 #endif /* MAIN_H */

@@ -21,11 +21,11 @@
 void (*rom_except_tick)(void) = NULL;
 void (*rom_except_int)(void) = NULL;
 
-static uint32_t irq_pending = 0U;
-static uint32_t g_tick_count = 0U;
-static uint32_t exception_count = 0U;
+FW_STATIC uint32_t irq_pending = 0U;
+FW_STATIC uint32_t g_tick_count = 0U;
+FW_STATIC uint32_t exception_count = 0U;
 
-static void tick_printf(const char *fmt, ...) {
+FW_STATIC void tick_printf(const char *fmt, ...) {
     va_list args;
     (void)printf("[tick: %05u] ", g_tick_count);
     va_start(args, fmt);
@@ -73,7 +73,7 @@ void irq_trigger(uint32_t irq_num) {
  * @param [in] mask type=[uint32_t] R=[0-0xFFFFFFFF] P=[N/A] N=[N/A] D=[bitmask of IRQs to trigger]
  * @retval type=[void] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
  */
-void irq_trigger_raw(uint32_t mask) {
+FW_STATIC void irq_trigger_raw(uint32_t mask) {
     irq_pending |= mask;
     tick_printf("[IRQ] Raw trigger: pending = 0x%08X\n", irq_pending);
 }
@@ -218,7 +218,7 @@ void irq_process_all(void) {
  * @brief Get current IRQ pending register value (for test access)
  * @retval type=[uint32_t] current irq_pending value
  */
-uint32_t irq_get_pending(void) {
+FW_STATIC uint32_t irq_get_pending(void) {
     return irq_pending;
 }
 
@@ -226,14 +226,14 @@ uint32_t irq_get_pending(void) {
  * @brief Get current tick count value (for test access)
  * @retval type=[unsigned int] current g_tick_count value
  */
-uint32_t irq_get_tick(void) {
+FW_STATIC uint32_t irq_get_tick(void) {
     return g_tick_count;
 }
 
 /**
  * @brief Reset all IRQ state to initial values (for test setup)
  */
-void irq_reset_all(void) {
+FW_STATIC void irq_reset_all(void) {
     irq_pending = 0U;
     g_tick_count = 0U;
     exception_count = 0U;
@@ -243,7 +243,7 @@ void irq_reset_all(void) {
  * @brief Get current exception count value (for test access)
  * @retval type=[unsigned int] current exception_count value
  */
-uint32_t exception_get_count(void) {
+FW_STATIC uint32_t exception_get_count(void) {
     return exception_count;
 }
 
