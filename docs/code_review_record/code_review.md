@@ -8,7 +8,7 @@
 
 <!-- REVIEW_ENTRIES_START -->
 
-## [2026-05-20] Review — src/main.c
+## [2026-05-20] Review #2 — src/main.c
 
 **Review Date**: 2026-05-20
 
@@ -16,12 +16,34 @@
 
 | # | Severity | File | Line(s) | Category | Issue | Status | Fix Date |
 |---|----------|------|---------|----------|-------|--------|----------|
-| 1 | 🟡 Warning | src/main.c | L25-L26 | Static Analysis | rom_except_* initialized to NULL — premature ISR trigger causes HardFault | pending | — |
-| 2 | 🟡 Warning | src/main.c | L313, L322 | Static Analysis | sscanf format/type mismatch (%x→uint32_t*, %d→int32_t*) — UB on non-ILP32 platforms | pending | — |
-| 3 | 🟡 Warning | src/main.c | L211 | Static Analysis | irq_handler() missing boundary check before 1U << irq_num (UB when irq_num ≥ 32) | pending | — |
-| 4 | 🟡 Warning | src/main.c | L59-L61 | Static Analysis | g_tick_count++ is non-atomic (LDR→ADD→STR) — may lose counts under nested ISRs | pending | — |
-| 5 | 🔵 Info | src/main.c | L286 | Code Quality | CLI buffer char line[64] uses magic number without named constant | pending | — |
-| 6 | 🟡 Warning | src/main.c | L103-L209 | Maintainability | 107-line switch-case in irq_handler() — high maintenance cost, duplicates tick_printf patterns 32× | pending | — |
+| 1 | 🟡 Warning | src/main.c | L107 | Static Analysis | irq_trigger(): irq_pending \|= (1U<<irq_num) without __disable_irq() — race with ISR bit-clear losing concurrent updates | pending | — |
+| 2 | 🟡 Warning | src/main.c | L112 | Static Analysis | irq_trigger_raw(): irq_pending \|= mask without __disable_irq() — same race as #1 | pending | — |
+| 3 | 🟡 Warning | src/main.c | L233-L237 | Static Analysis | irq_reset_all(): 3 global writes without __disable_irq() — ISR firing mid-reset leaves partially-reset state | pending | — |
+| 4 | 🔵 Info | src/main.c | L48 | Code Quality | tick_printf() reads g_tick_count without __disable_irq() — displayed tick may lag 1 behind | pending | — |
+
+### Refactoring Suggestions
+
+| # | Suggestion | Benefit |
+|---|-----------|---------|
+| D | Wrap critical sections with CRITICAL_SECTION_BEGIN/END macros | Makes intent explicit; prevents forgetting __enable_irq() |
+
+---
+
+
+## [2026-05-20] Review #1 — src/main.c
+
+**Review Date**: 2026-05-20
+
+### Issues
+
+| # | Severity | File | Line(s) | Category | Issue | Status | Fix Date |
+|---|----------|------|---------|----------|-------|--------|----------|
+| 1 | 🟡 Warning | src/main.c | L25-L26 | Static Analysis | rom_except_* initialized to NULL — premature ISR trigger causes HardFault | **fixed** | 2026-05-20 |
+| 2 | 🟡 Warning | src/main.c | L313, L322 | Static Analysis | sscanf format/type mismatch (%x→uint32_t*, %d→int32_t*) — UB on non-ILP32 platforms | **fixed** | 2026-05-20 |
+| 3 | 🟡 Warning | src/main.c | L211 | Static Analysis | irq_handler() missing boundary check before 1U << irq_num (UB when irq_num ≥ 32) | **fixed** | 2026-05-20 |
+| 4 | 🟡 Warning | src/main.c | L59-L61 | Static Analysis | g_tick_count++ is non-atomic (LDR→ADD→STR) — may lose counts under nested ISRs | **fixed** | 2026-05-20 |
+| 5 | 🔵 Info | src/main.c | L286 | Code Quality | CLI buffer char line[64] uses magic number without named constant | **fixed** | 2026-05-20 |
+| 6 | 🟡 Warning | src/main.c | L103-L209 | Maintainability | 107-line switch-case in irq_handler() — high maintenance cost, duplicates tick_printf patterns 32× | **fixed** | 2026-05-20 |
 
 ### Refactoring Suggestions
 
