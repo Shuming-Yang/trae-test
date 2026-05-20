@@ -10,10 +10,13 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-#include <stdio.h>
 #include <stdint.h>
 
-#define IRQ_COUNT   32
+#define IRQ_COUNT   32U
+
+/* Global function pointers for exception handlers (referenced in start.s) */
+extern void (*rom_except_tick)(void);
+extern void (*rom_except_int)(void);
 
 /* Function declarations */
 

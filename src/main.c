@@ -9,16 +9,29 @@
 
 #include "main.h"
 #include <string.h>
+/*
+ * MISRA deviation: <stdarg.h> (Rule 17.1) and <stdio.h> (Rule 21.6)
+ * are intentionally deviated for the tick_printf() debug output facility,
+ * fflush, fgets, and sscanf used in the CLI loop.
+ */
+#include <stdarg.h>
+#include <stdio.h>
 
 /* Global function pointers for exception handlers (referenced in start.s) */
-void (*_rom_except_tick)(void) = NULL;
-void (*_rom_except_int)(void) = NULL;
+void (*rom_except_tick)(void) = NULL;
+void (*rom_except_int)(void) = NULL;
 
-static uint32_t irq_pending = 0;
+static uint32_t irq_pending = 0U;
 static uint32_t g_tick_count = 0U;
 static uint32_t exception_count = 0U;
 
-#define TICK_PRINTF(fmt, ...) printf("[tick: %05u] " fmt, g_tick_count, ##__VA_ARGS__)
+static void tick_printf(const char *fmt, ...) {
+    va_list args;
+    (void)printf("[tick: %05u] ", g_tick_count);
+    va_start(args, fmt);
+    (void)vprintf(fmt, args);
+    va_end(args);
+}
 
 /**
  * @brief Tick interrupt handler function
@@ -49,9 +62,9 @@ void exception_irq_handler(void) {
 void irq_trigger(uint32_t irq_num) {
     if (irq_num < IRQ_COUNT) {
         irq_pending |= (1U << irq_num);
-        TICK_PRINTF("[IRQ] IRQ%u triggered (pending: 0x%08X)\n", irq_num, irq_pending);
+        tick_printf("[IRQ] IRQ%u triggered (pending: 0x%08X)\n", irq_num, irq_pending);
     } else {
-        TICK_PRINTF("[IRQ] Invalid IRQ number: %u (valid range: 0-%u)\n", irq_num, IRQ_COUNT - 1);
+        tick_printf("[IRQ] Invalid IRQ number: %u (valid range: 0-%u)\n", irq_num, IRQ_COUNT - 1U);
     }
 }
 
@@ -62,7 +75,7 @@ void irq_trigger(uint32_t irq_num) {
  */
 void irq_trigger_raw(uint32_t mask) {
     irq_pending |= mask;
-    TICK_PRINTF("[IRQ] Raw trigger: pending = 0x%08X\n", irq_pending);
+    tick_printf("[IRQ] Raw trigger: pending = 0x%08X\n", irq_pending);
 }
 
 /**
@@ -72,109 +85,109 @@ void irq_trigger_raw(uint32_t mask) {
  * @retval type=[void] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
  */
 void irq_handler(uint32_t irq_num) {
-    TICK_PRINTF("  -> Handling IRQ%u: ", irq_num);
+    tick_printf("  -> Handling IRQ%u: ", irq_num);
 
     switch (irq_num) {
     case 0:
-        TICK_PRINTF("System Timer IRQ - tick count updated\n");
+        tick_printf("System Timer IRQ - tick count updated\n");
         tick_irq_handler();
         break;
     case 1:
-        TICK_PRINTF("UART0 RX IRQ - data received\n");
+        tick_printf("UART0 RX IRQ - data received\n");
         break;
     case 2:
-        TICK_PRINTF("UART0 TX IRQ - data transmitted\n");
+        tick_printf("UART0 TX IRQ - data transmitted\n");
         break;
     case 3:
-        TICK_PRINTF("GPIO Port A IRQ - pin state changed\n");
+        tick_printf("GPIO Port A IRQ - pin state changed\n");
         break;
     case 4:
-        TICK_PRINTF("GPIO Port B IRQ - pin state changed\n");
+        tick_printf("GPIO Port B IRQ - pin state changed\n");
         break;
     case 5:
-        TICK_PRINTF("SPI0 IRQ - transfer complete\n");
+        tick_printf("SPI0 IRQ - transfer complete\n");
         break;
     case 6:
-        TICK_PRINTF("I2C0 IRQ - transaction done\n");
+        tick_printf("I2C0 IRQ - transaction done\n");
         break;
     case 7:
-        TICK_PRINTF("ADC IRQ - conversion complete\n");
+        tick_printf("ADC IRQ - conversion complete\n");
         break;
     case 8:
-        TICK_PRINTF("DMA Channel 0 IRQ - transfer finished\n");
+        tick_printf("DMA Channel 0 IRQ - transfer finished\n");
         break;
     case 9:
-        TICK_PRINTF("DMA Channel 1 IRQ - transfer finished\n");
+        tick_printf("DMA Channel 1 IRQ - transfer finished\n");
         break;
     case 10:
-        TICK_PRINTF("Watchdog IRQ - timer expired\n");
+        tick_printf("Watchdog IRQ - timer expired\n");
         break;
     case 11:
-        TICK_PRINTF("RTC IRQ - alarm triggered\n");
+        tick_printf("RTC IRQ - alarm triggered\n");
         break;
     case 12:
-        TICK_PRINTF("USB IRQ - device event\n");
+        tick_printf("USB IRQ - device event\n");
         break;
     case 13:
-        TICK_PRINTF("CAN0 IRQ - message received\n");
+        tick_printf("CAN0 IRQ - message received\n");
         break;
     case 14:
-        TICK_PRINTF("PWM IRQ - period elapsed\n");
+        tick_printf("PWM IRQ - period elapsed\n");
         break;
     case 15:
-        TICK_PRINTF("Timer1 IRQ - compare match\n");
+        tick_printf("Timer1 IRQ - compare match\n");
         break;
     case 16:
-        TICK_PRINTF("Timer2 IRQ - overflow\n");
+        tick_printf("Timer2 IRQ - overflow\n");
         break;
     case 17:
-        TICK_PRINTF("UART1 RX IRQ - data received\n");
+        tick_printf("UART1 RX IRQ - data received\n");
         break;
     case 18:
-        TICK_PRINTF("UART1 TX IRQ - data transmitted\n");
+        tick_printf("UART1 TX IRQ - data transmitted\n");
         break;
     case 19:
-        TICK_PRINTF("SPI1 IRQ - transfer complete\n");
+        tick_printf("SPI1 IRQ - transfer complete\n");
         break;
     case 20:
-        TICK_PRINTF("I2C1 IRQ - transaction done\n");
+        tick_printf("I2C1 IRQ - transaction done\n");
         break;
     case 21:
-        TICK_PRINTF("External INT0 - rising edge detected\n");
+        tick_printf("External INT0 - rising edge detected\n");
         break;
     case 22:
-        TICK_PRINTF("External INT1 - falling edge detected\n");
+        tick_printf("External INT1 - falling edge detected\n");
         break;
     case 23:
-        TICK_PRINTF("External INT2 - level triggered\n");
+        tick_printf("External INT2 - level triggered\n");
         break;
     case 24:
-        TICK_PRINTF("DMA Channel 2 IRQ - transfer finished\n");
+        tick_printf("DMA Channel 2 IRQ - transfer finished\n");
         break;
     case 25:
-        TICK_PRINTF("DMA Channel 3 IRQ - transfer finished\n");
+        tick_printf("DMA Channel 3 IRQ - transfer finished\n");
         break;
     case 26:
-        TICK_PRINTF("CRC IRQ - calculation done\n");
+        tick_printf("CRC IRQ - calculation done\n");
         break;
     case 27:
-        TICK_PRINTF("AES IRQ - encryption complete\n");
+        tick_printf("AES IRQ - encryption complete\n");
         break;
     case 28:
-        TICK_PRINTF("QSPI IRQ - command finished\n");
+        tick_printf("QSPI IRQ - command finished\n");
         break;
     case 29:
-        TICK_PRINTF("SDIO IRQ - card event\n");
+        tick_printf("SDIO IRQ - card event\n");
         break;
     case 30:
-        TICK_PRINTF("Ethernet IRQ - packet received\n");
+        tick_printf("Ethernet IRQ - packet received\n");
         break;
     case 31:
-        TICK_PRINTF("Exception IRQ - external interrupt\n");
+        tick_printf("Exception IRQ - external interrupt\n");
         exception_irq_handler();
         break;
     default:
-        TICK_PRINTF("Unknown IRQ\n");
+        tick_printf("Unknown IRQ\n");
         break;
     }
 
@@ -190,19 +203,17 @@ void irq_handler(uint32_t irq_num) {
 void irq_process_all(void) {
     uint32_t i;
 
-    if (irq_pending == 0U) {
-        return;
-    }
+    if (irq_pending != 0U) {
+        tick_printf("\n=== Processing pending IRQs (0x%08X) ===\n", irq_pending);
 
-    TICK_PRINTF("\n=== Processing pending IRQs (0x%08X) ===\n", irq_pending);
-
-    for (i = 0; i < IRQ_COUNT; i++) {
-        if (irq_pending & (1U << i)) {
-            irq_handler(i);
+        for (i = 0U; i < IRQ_COUNT; i++) {
+            if ((irq_pending & (1U << i)) != 0U) {
+                irq_handler(i);
+            }
         }
-    }
 
-    TICK_PRINTF("=== All IRQs processed ===\n\n");
+        tick_printf("=== All IRQs processed ===\n\n");
+    }
 }
 
 /**
@@ -225,9 +236,9 @@ uint32_t irq_get_tick(void) {
  * @brief Reset all IRQ state to initial values (for test setup)
  */
 void irq_reset_all(void) {
-    irq_pending = 0;
-    g_tick_count = 0;
-    exception_count = 0;
+    irq_pending = 0U;
+    g_tick_count = 0U;
+    exception_count = 0U;
 }
 
 /**
@@ -251,62 +262,71 @@ int32_t main(int32_t argc, char* argv[]) {
     int32_t input;
     uint32_t hex_val;
 
-    _rom_except_tick = tick_irq_handler;
-    _rom_except_int = exception_irq_handler;
+    (void)argc;
+    (void)argv;
 
-    TICK_PRINTF("Hello, TRAE IDE!\n");
-    TICK_PRINTF("This is a C project built with CMake.\n");
-    TICK_PRINTF("Tick and exception handlers registered.\n\n");
+    rom_except_tick = tick_irq_handler;
+    rom_except_int = exception_irq_handler;
 
-    TICK_PRINTF("========== IRQ Simulator ==========\n");
-    TICK_PRINTF("  <num>   : trigger single IRQ (1-32 -> IRQ0-IRQ31)\n");
-    TICK_PRINTF("  b<num>  : bit mode, trigger single IRQ (b1 -> IRQ1)\n");
-    TICK_PRINTF("  h<hex>  : hex mode, trigger multiple IRQs (h3 -> IRQ0,1)\n");
-    TICK_PRINTF("  0       : process all pending IRQs manually\n");
-    TICK_PRINTF("  exit    : quit simulator\n");
-    TICK_PRINTF("===================================\n\n");
+    tick_printf("Hello, TRAE IDE!\n");
+    tick_printf("This is a C project built with CMake.\n");
+    tick_printf("Tick and exception handlers registered.\n\n");
 
-    while (1) {
+    tick_printf("========== IRQ Simulator ==========\n");
+    tick_printf("  <num>   : trigger single IRQ (1-32 -> IRQ0-IRQ31)\n");
+    tick_printf("  b<num>  : bit mode, trigger single IRQ (b1 -> IRQ1)\n");
+    tick_printf("  h<hex>  : hex mode, trigger multiple IRQs (h3 -> IRQ0,1)\n");
+    tick_printf("  0       : process all pending IRQs manually\n");
+    tick_printf("  exit    : quit simulator\n");
+    tick_printf("===================================\n\n");
+
+    for (;;) {
+        int32_t done;
+
         tick_irq_handler();
 
-        TICK_PRINTF("IRQ> ");
-        fflush(stdout);
+        tick_printf("IRQ> ");
+        (void)fflush(stdout);
+
+        done = 0;
 
         if (fgets(line, sizeof(line), stdin) == NULL) {
-            break;
-        }
-
-        if (strcmp(line, "exit\n") == 0 || strcmp(line, "exit\r\n") == 0) {
-            TICK_PRINTF("Exiting IRQ Simulator. Goodbye!\n");
-            break;
-        }
-
-        if (line[0] == 'b' || line[0] == 'B') {
-            if (sscanf(line + 1, "%d", &input) == 1 && input >= 0 && input < IRQ_COUNT) {
+            done = 1;
+        } else if ((strcmp(line, "exit\n") == 0) || (strcmp(line, "exit\r\n") == 0)) {
+            tick_printf("Exiting IRQ Simulator. Goodbye!\n");
+            done = 1;
+        } else if ((line[0] == 'b') || (line[0] == 'B')) {
+            if ((sscanf(&line[1], "%d", &input) == 1) && (input >= 0) && ((uint32_t)input < IRQ_COUNT)) {
                 irq_trigger((uint32_t)input);
                 irq_process_all();
             } else {
-                TICK_PRINTF("Invalid bit mode. Usage: b<0-31> (e.g. b1)\n");
+                tick_printf("Invalid bit mode. Usage: b<0-31> (e.g. b1)\n");
             }
-        } else if (line[0] == 'h' || line[0] == 'H') {
-            if (sscanf(line + 1, "%x", &hex_val) == 1) {
+        } else if ((line[0] == 'h') || (line[0] == 'H')) {
+            if (sscanf(&line[1], "%x", &hex_val) == 1) {
                 irq_pending |= hex_val;
-                TICK_PRINTF("[IRQ] Hex trigger: pending = 0x%08X\n", irq_pending);
+                tick_printf("[IRQ] Hex trigger: pending = 0x%08X\n", irq_pending);
                 irq_process_all();
             } else {
-                TICK_PRINTF("Invalid hex mode. Usage: h<hex> (e.g. h3, hFF)\n");
+                tick_printf("Invalid hex mode. Usage: h<hex> (e.g. h3, hFF)\n");
             }
         } else if (sscanf(line, "%d", &input) == 1) {
             if (input == 0) {
                 irq_process_all();
-            } else if (input >= 1 && input <= 32) {
-                irq_trigger((uint32_t)(input - 1));
+            } else if ((input >= 1) && (input <= 32)) {
+                int32_t adjusted;
+                adjusted = input - 1;
+                irq_trigger((uint32_t)adjusted);
                 irq_process_all();
             } else {
-                TICK_PRINTF("Invalid IRQ number: %d (valid range: 1-32)\n", input);
+                tick_printf("Invalid IRQ number: %d (valid range: 1-32)\n", input);
             }
         } else {
-            TICK_PRINTF("Invalid input. Use: <num>, b<num>, h<hex>, 0, or exit\n");
+            tick_printf("Invalid input. Use: <num>, b<num>, h<hex>, 0, or exit\n");
+        }
+
+        if (done != 0) {
+            break;
         }
     }
 
