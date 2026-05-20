@@ -50,6 +50,7 @@ def find_misra_addon():
 
     # Common locations
     search_paths = [
+        "/mingw64/share/cppcheck/addons/",
         "/usr/share/cppcheck/addons/",
         "/usr/local/share/cppcheck/addons/",
         "/usr/lib/cppcheck/addons/",
