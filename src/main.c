@@ -201,12 +201,10 @@ void irq_handler(uint32_t irq_num) {
  * @retval type=[void] R=[N/A] P=[N/A] N=[N/A] D=[N/A]
  */
 void irq_process_all(void) {
-    uint32_t i;
-
     if (irq_pending != 0U) {
         tick_printf("\n=== Processing pending IRQs (0x%08X) ===\n", irq_pending);
 
-        for (i = 0U; i < IRQ_COUNT; i++) {
+        for (uint32_t i = 0U; i < IRQ_COUNT; i++) {
             if ((irq_pending & (1U << i)) != 0U) {
                 irq_handler(i);
             }
