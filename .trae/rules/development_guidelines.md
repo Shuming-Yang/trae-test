@@ -18,5 +18,15 @@ alwaysApply: true
   - 新增任何核心功能，必須同時在 `unit_test/` 目錄下產生對應的單元測試（Unit Test）。
   - 新增任何核心功能，必須同時在 `integration_test/` 目錄下產生對應的整合與介面接口測試（Integration Test）。
 
+# Code Review 流程規範
+- 每次 `src/` 目錄內的 C 原始碼或標頭檔發生變動時，使用者會觸發 `smart-code-reviewer` 技能進行審查。
+- AI 必須在執行新的 Code Review 之前，先回溯比對 `docs/code_review_record/code_review.md` 中前次 review 遺留的 issue：
+  - 若 issue 已於當前程式碼中修復 → 自動標記為 `**fixed**` + 當天日期（使用 `python tools/gen_code_review.py --fix-issue N`）
+  - 若 issue 尚未修復 → 逐個詢問使用者是否維持 `pending` 或改為 `❌ ignored`（使用 `python tools/gen_code_review.py --ignore-issue N`）
+  - 若先前標記為 `❌ ignored` 的 issue 已被修復 → 自動改為 `**fixed**`
+- 新的 review 結果必須以 per-issue 表格格式寫入同一個檔案，每筆新 issue 初始狀態為 `pending`
+- review 紀錄檔位置：`docs/code_review_record/code_review.md`
+- CI pipeline 中的 `gen_code_review.py` 僅負責偵測 `src/` 變動並建立新的 review entry 模板，**不執行 auto-fix**（auto-fix 由 AI 在 Code Review 階段處理）
+
 # 文件規範
 - 修改或新增 API/函式時，必須同步更新 Docstring，並確保符合 MkDocs/Sphinx 的文件生成格式。
