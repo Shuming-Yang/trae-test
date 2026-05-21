@@ -33,4 +33,12 @@ with open(OUTPUT_PATH, "w", encoding="utf-8") as mdf:
     for filename, func in warnings:
         mdf.write(f"| {func.nloc} | {func.cyclomatic_complexity} | {len(func.parameters)} | {filename}:{func.start_line} @ `{func.name}` |\n")
 
+    mdf.write("\n---\n\n")
+    mdf.write("## Abbreviation Reference\n\n")
+    mdf.write("| Abbreviation | Full Name | Description |\n")
+    mdf.write("|---|---|---|\n")
+    mdf.write("| **NLOC** | Net Lines of Code | Number of executable lines (excludes blanks and comments) |\n")
+    mdf.write("| **CCN** | Cyclomatic Complexity Number | McCabe complexity metric; higher values indicate more branching paths |\n")
+    mdf.write("| **Param** | Parameters Count | Number of formal parameters in the function signature |\n")
+
 print(f"Success! Report written to lizard_report.md ({len(warnings)} violations found).")
