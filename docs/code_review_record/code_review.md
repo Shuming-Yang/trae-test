@@ -8,6 +8,32 @@
 
 <!-- REVIEW_ENTRIES_START -->
 
+## [2026-05-21] Review #5 — src/ (main.c, start.s) + inc/main.h
+
+**Review Date**: 2026-05-21
+**Scope**: Full scan of `src/main.c`, `src/start.s`, `inc/main.h` (excluding `src/make_misra_error.c` which is intentionally incorrect for MISRA demo purposes).
+
+### Issues
+
+| # | Severity | File | Line(s) | Category | Issue | Status | Fix Date |
+|---|----------|------|---------|----------|-------|--------|----------|
+| 1 | 🔴 Critical | src/start.s | L28-L49 | Logic Bug | _tick_isr / _int_isr: l.sfeqi sets flag but no l.jalr/l.bf follows — C handlers never called from real HW ISR | pending | — |
+| 2 | 🟡 Warning | src/main.c | L52-L54 | Performance | tick_printf(): printf("[tick: %05u]", g_tick_count) executes inside __disable_irq() critical section; printf is I/O-heavy, increases interrupt latency significantly | pending | — |
+| 3 | 🟡 Warning | src/main.c | L218, L221 | Race Condition | irq_process_all(): reads irq_pending without __disable_irq() in both the initial check and per-iteration test — newly triggered IRQs may be missed or double-processed during the loop | pending | — |
+| 4 | 🔵 Info | src/main.c | L15 | Code Quality | <stdarg.h> include lacks cppcheck-suppress markers, inconsistent with <stdio.h> (L17-L19) which has explicit suppress-begin/end | pending | — |
+| 5 | 🔵 Info | src/main.c | L147-L178 | Portability | irq_names[] uses C99 designated initializers [0]=... — verify target embedded toolchain supports C99; fall back to positional initializers if only C90 is available | pending | — |
+
+### Refactoring Suggestions
+
+| # | Suggestion | Benefit |
+|---|-----------|---------|
+| D | (carried from Review #2/#4) Wrap critical sections with CRITICAL_SECTION_BEGIN/END macros | Makes intent explicit; prevents forgetting __enable_irq(); easier to swap in real HW intrinsics |
+| F | Apply snapshot pattern to tick_printf() and irq_process_all() (consistent with Review #3 Suggestion E) | Fixes Issue #2 and #3; minimizes critical section duration; prevents stale/missed IRQ display |
+| G | Add l.jalr + l.bf conditional call sequence in start.s ISR stubs | Fixes Issue #1; enables real hardware interrupt handling |
+
+---
+
+
 ## [2026-05-20] Review #4 — src/main.c
 
 **Review Date**: 2026-05-20
