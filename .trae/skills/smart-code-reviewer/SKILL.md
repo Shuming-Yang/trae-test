@@ -1,6 +1,7 @@
 ---
 name: smart-code-reviewer
 description: 對指定的程式碼片段進行深度 Code Review，找出潛在 Bug、效能瓶頸與資安漏洞。
+version: 1.0.0
 ---
 
 # smart-code-reviewer
