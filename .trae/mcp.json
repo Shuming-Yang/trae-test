@@ -1,0 +1,20 @@
+{
+  "mcpServers": {
+    "team-file-system": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "${workspaceFolder}"
+      ]
+    },
+    "team-pip-ddg": {
+      "command": "${workspaceFolder}/.venv/Scripts/duckduckgo-mcp-server.exe",
+      "args": []
+    },
+    "team-global-fetch": {
+      "command": "${workspaceFolder}/.venv/Scripts/mcp-server-fetch.exe",
+      "args": []
+    }
+  }
+}
