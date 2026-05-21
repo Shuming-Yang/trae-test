@@ -5,8 +5,8 @@ import os
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUTPUT_PATH = os.path.join(PROJECT_ROOT, "docs", "05_software_integration_test", "lizard_report.md")
 
-# 1. Analyze the project directory
-file_infos = lizard.analyze(["."])
+# 1. Analyze only src/ and inc/ directories
+file_infos = lizard.analyze(["src", "inc"])
 
 # 2. Collect all functions from all analyzed files
 all_functions = []
