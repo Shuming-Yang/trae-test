@@ -1,0 +1,28 @@
+{
+  "version": "1.0.0",
+  "agent": {
+    "mode": "builder",
+    "permissions": {
+      "terminal": {
+        "execution_policy": "restricted",
+        "allowed_commands": [
+          "python tools/gen_code_review.py",
+          "python tools/gen_code_review.py --fix-issue *"
+        ],
+        "auto_approve": false
+      },
+      "filesystem": {
+        "read": ["src/**", "inc/**", "docs/**"],
+        "write": ["docs/code_review_record/**"]
+      }
+    }
+  },
+  "skills": {
+    "smart-code-reviewer": {
+      "enable_tools": ["terminal", "filesystem"],
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}"
+      }
+    }
+  }
+}
