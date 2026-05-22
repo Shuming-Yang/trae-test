@@ -8,6 +8,56 @@
 
 <!-- REVIEW_ENTRIES_START -->
 
+## [2026-05-22] Review #6 — src/main.c
+
+**Review Date**: 2026-05-22
+**Scope**: `src/main.c` only.
+
+### Previous Issues Status (from Review #5)
+
+| Review #5 # | Status | Notes |
+|-------------|--------|-------|
+| 1 (start.s) | ➖ skipped | Not in scope |
+| 2 (printf in critical section) | ⚠️ pending | Code unchanged |
+| 3 (irq_process_all reads without lock) | ⚠️ pending | Code unchanged |
+| 4 (stdarg.h cppcheck-suppress) | ⚠️ pending | Deviation comment added, inline suppress still missing |
+| 5 (C99 designated initializers) | ⚠️ pending | Code unchanged |
+
+### New Issues
+
+| # | Severity | File | Line(s) | Category | Issue | Status | Fix Date |
+|---|----------|------|---------|----------|-------|--------|----------|
+| 1 | 🟡 Warning | src/main.c | L29-L31 | Correctness | irq_pending / g_tick_count / exception_count 未宣告 volatile — __disable_irq() 為 no-op stub，編譯器無 memory barrier，LTO 下可能快取過期值或消除變數 | pending | — |
+| 2 | 🟡 Warning | src/main.c | L253 | MISRA / Standard | int32_t main(int32_t argc, char* argv[]) — C 標準要求 main 回傳 int、argc 為 int；CERT C ERR33-C；MISRA checker 與 -Wmain 會報錯 | pending | — |
+| 3 | 🔵 Info | src/main.c | L104 | MISRA R8.9 | pending_snapshot 宣告寫在 critical section 內部，應移到 __disable_irq() 前或 block 最上層 | pending | — |
+| 4 | 🔵 Info | src/main.c | L290-L300 | Documentation | fgets 已保證 bounds safety；應添加註解防止後續維護時誤判為 buffer overflow 風險 | pending | — |
+
+### Refactoring Suggestions
+
+| # | Suggestion | Benefit |
+|---|-----------|---------|
+| H | 將 irq_pending 等共享變數改為 FW_STATIC volatile uint32_t | 解決新 Issue #1；移植真實硬體時避免 LTO 優化消去變數 |
+| I | main() 簽章改為 int main(int argc, char *argv[]) | 解決新 Issue #2；C 標準合規；MISRA checker 不再報錯 |
+| J | (延續 Suggestion F from Review #5) 對 tick_printf() 中的 g_tick_count 取值也做 snapshot，最小化 critical section | 解決 Review #5 Issue #2 |
+
+### MISRA Rule Checklist
+
+| Rule | Description | Status |
+|------|-------------|--------|
+| R2.7 | unused parameter → `(void)argc/argv` | ✅ |
+| R8.7 | FW_STATIC controls symbol visibility | ✅ |
+| R8.9 | variables in minimal scope | ⚠️ see Issue #3 |
+| R8.12 | implicit signed/unsigned → uint32_t explicit | ✅ |
+| R9.1 | auto variables assigned before use | ✅ |
+| R10.4 | no mixed essential type arithmetic | ✅ |
+| R13.3 | no side effects in expressions | ✅ |
+| R17.1 | va_list — deviation documented | ✅ |
+| R17.7 | unused return → `(void)` cast | ✅ |
+| R21.6 | stdio.h — suppressed | ✅ |
+
+---
+
+
 ## [2026-05-21] Review #5 — src/ (main.c, start.s) + inc/main.h
 
 **Review Date**: 2026-05-21
