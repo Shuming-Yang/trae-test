@@ -17,14 +17,14 @@
 - **跳過已掃描內容**：若該檔案在 `code_review.md` 中且狀態為 `fixed` 或 `ignored`，則自動跳過，僅分析未紀錄的檔案。
 
 ### 核心審查三步驟
-- **Step 1: 靜態分析**：執行語法掃描與邏輯檢查，檢測未處理的 Exception、潛在記憶體洩漏或資源未釋放問題。
-- **Step 2: 資安與權限掃描**：評估是否存在資安漏洞（如：不安全的 API 使用、明文傳輸、輸入驗證不足、未符合 MISRA 規範等）。
-- **Step 3: 效能評估**：識別效能瓶頸（如 $O(N^2)$ 迴圈、過度的 API 呼叫、資源鎖競爭）。
+- **Step 1: 靜態分析**：執行語法掃描與邏輯檢查，檢測未處理的 Exception、潛在記憶體洩漏或資源未釋放問題。**（審查時需參考 `../references/misra_c_rules.md` 的記憶體與指標安全規範）**
+- **Step 2: 資安與權限掃描**：評估是否存在資安漏洞（如：不安全的 API 使用、明文傳輸、輸入驗證不足、未符合 MISRA 規範等）。**（審查時需強制比對 `../references/misra_c_rules.md` 的標準函式庫限制與資源管理條款）**
+- **Step 3: 效能評估**：識別效能瓶頸（如 O(N²) 迴圈、過度的 API 呼叫、資源鎖競爭）。
 
 ### Step 4: 建議與重構
 針對發現的 Issue，提供精確的重構對比：
 - **問題清單**：列出有問題的行數、Severity (Critical/Warning/Info) 與原因。
-- **優化對比**：提供 `Before` vs `After` 的程式碼區塊。
+- **優化對比**：提供 `Before` vs `After` 的程式碼區塊。**（輸出格式與重構邏輯請嚴格模仿 `../references/code_style_patterns.md` 中的黃金範例）**
 - **效益說明**：說明優化後預期的具體好處（如：防止緩衝區溢位、提升可維護性）。
 
 ### Step 5: 紀錄維護 (輸出格式)
@@ -45,7 +45,9 @@
 ```c
 // Before
 strcpy(dest, src);
+```
 
+```c
 // After
 strncpy(dest, src, sizeof(dest) - 1);
 dest[sizeof(dest) - 1] = '\0';
