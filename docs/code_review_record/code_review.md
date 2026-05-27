@@ -8,6 +8,58 @@
 
 <!-- REVIEW_ENTRIES_START -->
 
+## [2026-05-27] Review #7 — src/main.c + inc/main.h
+
+**Review Date**: 2026-05-27
+**Scope**: `src/main.c`, `inc/main.h` (excluding `src/make_misra_error.c` and `src/start.s`).
+
+### Previous Issues Status (from Review #6 + Review #5)
+
+| Review | # | Status | Notes |
+|--------|---|--------|-------|
+| #6 | 1 (volatile) | ⚠️ pending | Code unchanged |
+| #6 | 2 (main signature) | ⚠️ pending | Code unchanged |
+| #6 | 3 (pending_snapshot scope) | ⚠️ pending | Code unchanged |
+| #6 | 4 (fgets comment) | ⚠️ pending | Code unchanged |
+| #5 | 2 (printf in critical section) | ❌ ignored | Confirmed by user on 2026-05-27 |
+| #5 | 3 (irq_process_all no lock) | ⚠️ pending | Code unchanged |
+| #5 | 4 (stdarg.h cppcheck-suppress) | ⚠️ pending | Code unchanged |
+| #5 | 5 (C99 designated initializers) | ⚠️ pending | Code unchanged |
+
+### New Issues
+
+| # | Severity | File | Line(s) | Category | Issue | Status | Fix Date |
+|---|----------|------|---------|----------|-------|--------|----------|
+| 1 | 🟡 Warning | inc/main.h | L117 | MISRA R17.3 | tick_printf() declared as FW_STATIC only inside #ifdef TEST_BUILD block, but the production main() (#ifndef TEST_BUILD) at main.c L263-L331 calls it extensively — production build triggers implicit function declaration warning (constraint violation since C99) | pending | — |
+| 2 | 🔵 Info | src/main.c | L180-L189 | Design | irq_handler() calls tick_irq_handler() (L181) and exception_irq_handler() (L184) — both handlers internally wrap their bodies with __disable_irq()/__enable_irq(), while irq_handler() also has its own __disable_irq()/__enable_irq() at L187-L189, creating a nested critical section; harmless under no-op stubs, but double interrupt masking could cause issues when porting to real hardware | pending | — |
+| 3 | 🔵 Info | inc/main.h | L42-L51, L54-L67 | Documentation | Doxygen @param blocks for __disable_irq() / __enable_irq() / tick_irq_handler() / exception_irq_handler() use filler pattern (type=[N/A] R=[N/A] P=[N/A] N=[N/A] D=[N/A]) which adds no value to generated documentation | pending | — |
+
+### Refactoring Suggestions
+
+| # | Suggestion | Benefit |
+|---|-----------|---------|
+| K | Move the tick_printf() declaration outside the #ifdef TEST_BUILD guard (while still protecting the definition), or guard all tick_printf() call sites in main() with conditional compilation | Fixes Issue #1; eliminates implicit declaration warning in production build |
+| L | Move the IRQ0/IRQ31 special-case handling in irq_handler() outside the __disable_irq()/__enable_irq() region, or use a flag pattern to avoid double nesting | Fixes Issue #2; ensures safe interrupt masking when porting to real hardware |
+| M | Clean up Doxygen parameter annotations: replace cluttered @param blocks with `@remark No parameters.` for parameterless functions | Fixes Issue #3; improves documentation readability |
+
+### MISRA Rule Checklist
+
+| Rule | Description | Status |
+|------|-------------|--------|
+| R2.7 | unused parameter → `(void)argc/argv` | ✅ |
+| R8.7 | FW_STATIC controls symbol visibility | ✅ |
+| R8.9 | variables in minimal scope | ⚠️ see Review #6 Issue #3 |
+| R8.12 | implicit signed/unsigned → uint32_t explicit | ✅ |
+| R9.1 | auto variables assigned before use | ✅ |
+| R10.4 | no mixed essential type arithmetic | ✅ |
+| R13.3 | no side effects in expressions | ✅ |
+| R17.1 | va_list — deviation documented | ✅ |
+| R17.3 | implicit function declaration | ⚠️ see Issue #1 (New) |
+| R17.7 | unused return → `(void)` cast | ✅ |
+| R21.6 | stdio.h — suppressed | ✅ |
+
+---
+
 ## [2026-05-22] Review #6 — src/main.c
 
 **Review Date**: 2026-05-22
@@ -68,7 +120,7 @@
 | # | Severity | File | Line(s) | Category | Issue | Status | Fix Date |
 |---|----------|------|---------|----------|-------|--------|----------|
 | 1 | 🔴 Critical | src/start.s | L28-L49 | Logic Bug | _tick_isr / _int_isr: l.sfeqi sets flag but no l.jalr/l.bf follows — C handlers never called from real HW ISR | pending | — |
-| 2 | 🟡 Warning | src/main.c | L52-L54 | Performance | tick_printf(): printf("[tick: %05u]", g_tick_count) executes inside __disable_irq() critical section; printf is I/O-heavy, increases interrupt latency significantly | pending | — |
+| 2 | 🟡 Warning | src/main.c | L52-L54 | Performance | tick_printf(): printf("[tick: %05u]", g_tick_count) executes inside __disable_irq() critical section; printf is I/O-heavy, increases interrupt latency significantly | ❌ ignored | — |
 | 3 | 🟡 Warning | src/main.c | L218, L221 | Race Condition | irq_process_all(): reads irq_pending without __disable_irq() in both the initial check and per-iteration test — newly triggered IRQs may be missed or double-processed during the loop | pending | — |
 | 4 | 🔵 Info | src/main.c | L15 | Code Quality | <stdarg.h> include lacks cppcheck-suppress markers, inconsistent with <stdio.h> (L17-L19) which has explicit suppress-begin/end | pending | — |
 | 5 | 🔵 Info | src/main.c | L147-L178 | Portability | irq_names[] uses C99 designated initializers [0]=... — verify target embedded toolchain supports C99; fall back to positional initializers if only C90 is available | pending | — |
