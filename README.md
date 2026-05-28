@@ -36,39 +36,322 @@ An **embedded firmware IRQ (Interrupt Request) simulator** developed under the *
 
 ### Project Structure
 
+#### English
 ```
+├── .clinerules                   # Cline System Instructions for project context, rules, skills, and workflow
+├── .gitattributes                # Defines attributes per path, mainly for Git LFS and line ending normalization
+├── .gitignore                    # Specifies intentionally untracked files to ignore
+├── .gitlab-ci.yml                # GitLab CI/CD pipeline definition for automated builds, tests, and documentation deployment
+├── .vscodeignore                 # Specifies files/folders to ignore in VS Code extensions
+├── AGENTS.md                     # Defines advanced AI collaborator roles, technical stacks, and working principles
+├── CMakeLists.txt                # CMake build configuration for main executable, unit tests, and integration tests
+├── mkdocs.yml                    # MkDocs configuration for documentation site generation (Material theme, PDF plugin)
+├── README.md                     # This file (project overview, build instructions, CLI usage, and documentation links)
+├── requirements-mcp.txt          # List of Python packages required for MCP servers
+├── docs/                         # MkDocs documentation (ASPICE V-Model structure) - contains project specifications, designs, and reports
+│   ├── index.md                  # Documentation homepage (English)
+│   ├── index_cn.md               # Documentation homepage (Simplified Chinese)
+│   ├── index_tw.md               # Documentation homepage (Traditional Chinese)
+│   ├── 01_software_requirements/ # SWE.1: Software Requirement Specification documents (EN/CN/TW)
+│   │   ├── requirement_cn.md     # Simplified Chinese version of requirements
+│   │   ├── requirement_en.md     # English version of requirements
+│   │   └── requirement_tw.md     # Traditional Chinese version of requirements
+│   ├── 02_software_architecture/ # SWE.2: Software Architecture Design documents (EN/CN/TW) with various versions
+│   │   ├── software_architecture_cn_cline.md # Simplified Chinese architecture document (Cline generated)
+│   │   ├── software_architecture_cn_gemini.md # Simplified Chinese architecture document (Gemini generated)
+│   │   ├── software_architecture_cn.md # Simplified Chinese architecture document
+│   │   ├── software_architecture_en_cline.md # English architecture document (Cline generated)
+│   │   ├── software_architecture_en_gemini.md # English architecture document (Gemini generated)
+│   │   ├── software_architecture_en.md # English architecture document
+│   │   ├── software_architecture_tw_cline.md # Traditional Chinese architecture document (Cline generated)
+│   │   ├── software_architecture_tw_gemini.md # Traditional Chinese architecture document (Gemini generated)
+│   │   └── software_architecture_tw.md # Traditional Chinese architecture document
+│   ├── 03_software_detailed_design/ # SWE.3: Software Detailed Design documents (EN/CN/TW) and auto-generated function docs
+│   │   ├── software_design_cn_cline.md # Simplified Chinese detailed design (Cline generated)
+│   │   ├── software_design_cn_gemini.md # Simplified Chinese detailed design (Gemini generated)
+│   │   ├── software_design_cn.md # Simplified Chinese detailed design
+│   │   ├── software_design_en_cline.md # English detailed design (Cline generated)
+│   │   ├── software_design_en_gemini.md # English detailed design (Gemini generated)
+│   │   ├── software_design_en.md # English detailed design
+│   │   ├── software_design_tw_cline.md # Traditional Chinese detailed design (Cline generated)
+│   │   ├── software_design_tw_gemini.md # Traditional Chinese detailed design (Gemini generated)
+│   │   ├── software_design_tw.md # Traditional Chinese detailed design
+│   │   └── auto_generated/       # Auto-generated function documentation and flowcharts
+│   │       ├── func_main.md      # Auto-generated documentation for main.c functions
+│   │       └── index.md          # Index for auto-generated function documentation
+│   ├── 04_software_unit_verification/ # SWE.4: Unit Verification documents, test plans, and coverage reports
+│   │   ├── coverage_report.md    # Markdown file for unit test coverage report
+│   │   ├── unit_test_cn_cline.md # Simplified Chinese unit test plan (Cline generated)
+│   │   ├── unit_test_cn_gemini.md # Simplified Chinese unit test plan (Gemini generated)
+│   │   ├── unit_test_cn.md       # Simplified Chinese unit test plan
+│   │   ├── unit_test_en_cline.md # English unit test plan (Cline generated)
+│   │   ├── unit_test_en_gemini.md # English unit test plan (Gemini generated)
+│   │   ├── unit_test_en.md       # English unit test plan
+│   │   ├── unit_test_tw_cline.md # Traditional Chinese unit test plan (Cline generated)
+│   │   ├── unit_test_tw_gemini.md # Traditional Chinese unit test plan (Gemini generated)
+│   │   └── unit_test_tw.md       # Traditional Chinese unit test plan
+│   ├── 05_software_integration_test/  # SWE.5: Integration Test documents, test plans, MISRA, and complexity reports
+│   │   ├── coverage_report.md    # Markdown file for integration test coverage report
+│   │   ├── integrated_test_cn_cline.md # Simplified Chinese integration test plan (Cline generated)
+│   │   ├── integrated_test_cn_gemini.md # Simplified Chinese integration test plan (Gemini generated)
+│   │   ├── integrated_test_cn.md # Simplified Chinese integration test plan
+│   │   ├── integrated_test_en_cline.md # English integration test plan (Cline generated)
+│   │   ├── integrated_test_en_gemini.md # English integration test plan (Gemini generated)
+│   │   ├── integrated_test_en.md # English integration test plan
+│   │   ├── integrated_test_tw_cline.md # Traditional Chinese integration test plan (Cline generated)
+│   │   ├── integrated_test_tw_gemini.md # Traditional Chinese integration test plan (Gemini generated)
+│   │   ├── integrated_test_tw.md # Traditional Chinese integration test plan
+│   │   ├── lizard_report.md      # Report for cyclomatic complexity and NLOC analysis
+│   │   └── misra_report.md       # Report for MISRA C static analysis
+│   ├── code_review_record/       # Stores per-issue code review history
+│   │   └── code_review.md        # Detailed code review records
+│   ├── javascripts/              # JavaScript files for documentation site functionality
+│   │   └── lang-switcher.js      # Script for language switching functionality
+│   ├── stylesheets/              # CSS files for documentation site styling
+│   │   └── extra.css             # Additional custom CSS styles
+│   ├── misra/                    # MISRA C rule definitions or related files
+│   │   └── MISRA_Rule.txt        # Text file containing MISRA rule descriptions
+│   └── trae/                     # Placeholder directory (e.g., for project-specific assets)
+│       └── .gitkeep              # Ensures the directory is tracked by Git even if empty
+├── inc/                          # C header files
+│   └── main.h                    # Public API, type definitions, and test visibility macros for the IRQ simulator
+├── integration_test/             # Integration test source files
+│   ├── integrated_test.c         # End-to-end integration tests (IT_01 ~ IT_07) for the IRQ simulator CLI
+│   └── integrated_test.h         # Header file with integration test assertion macros
 ├── src/                          # C source code
-│   ├── main.c                    # Core IRQ simulator logic + CLI main loop
-│   ├── start.s                   # Assembly startup & interrupt vector stubs
-│   └── make_misra_error.c        # Intentionally MISRA-noncompliant demo file
-├── inc/
-│   └── main.h                    # Public API, type definitions, test visibility macros
-├── unit_test/
-│   ├── unit_test.c               # Unit tests for all core functions (UT_01 ~ UT_07)
-│   └── unit_test.h               # Unit test assertion macros
-├── integration_test/
-│   ├── integrated_test.c         # End-to-end integration tests (IT_01 ~ IT_07)
-│   └── integrated_test.h         # Integration test assertion macros
-├── tools/
-│   ├── gen_func_docs.py          # Auto-generate function docs + Mermaid flowcharts
-│   ├── gen_coverage_report.py    # Build, run unit_test, generate gcovr HTML coverage
-│   ├── gen_integration_coverage_report.py  # Build, run integrated_test, generate coverage
-│   ├── gen_misra_report.py       # Run cppcheck with MISRA addon, generate report
-│   ├── gen_code_review.py        # Detect src/ changes, manage per-issue review records
-│   ├── run_lizard.py             # Generate cyclomatic complexity / NLOC report
-│   └── ninja/                    # Prebuilt Ninja binaries (linux, win, mac, arm64)
-├── docs/                         # MkDocs documentation (ASPICE V-Model structure)
-│   ├── index.md                  # Documentation home (EN)
-│   ├── 01_software_requirements/ # SWE.1: Requirement specs (EN/CN/TW)
-│   ├── 02_software_architecture/ # SWE.2: Architecture docs (EN/CN/TW)
-│   ├── 03_software_detailed_design/ # SWE.3: Detailed design + auto-generated function docs
-│   ├── 04_software_unit_verification/ # SWE.4: Unit test plan + coverage report
-│   ├── 05_software_integration_test/  # SWE.5: Integration test + MISRA + lizard reports
-│   └── code_review_record/       # Per-issue code review history
-├── CMakeLists.txt                # CMake build configuration (3 targets)
-├── mkdocs.yml                    # MkDocs Material theme + PDF plugin config
-├── .gitlab-ci.yml                # GitLab CI/CD pipeline definition
-└── README.md                     # This file
+│   ├── main.c                    # Core IRQ simulator logic, CLI main loop, and interrupt handling functions
+│   ├── main.c.ctu-info           # Clang Tidy Unused file (tool-generated for static analysis)
+│   ├── make_misra_error.c        # Intentionally MISRA-noncompliant demo file to showcase MISRA violations
+│   └── start.s                   # Assembly startup code and interrupt vector stubs
+├── tools/                        # Python automation tools and utilities
+│   ├── gen_code_review.py        # Detects src/ changes and manages per-issue code review records
+│   ├── gen_coverage_report.py    # Builds and runs unit tests, then generates gcovr HTML coverage reports
+│   ├── gen_func_docs.py          # Auto-generates function documentation with Mermaid flowcharts from C source
+│   ├── gen_integration_coverage_report.py  # Builds and runs integration tests, then generates coverage reports
+│   ├── gen_misra_report.py       # Runs cppcheck with MISRA addon and generates MISRA C 2012 static analysis reports
+│   ├── run_lizard.py             # Generates cyclomatic complexity / NLOC / parameter count reports using Lizard
+│   └── ninja/                    # Directory containing prebuilt Ninja binaries for various platforms
+│       ├── ninja_env.cmake       # CMake environment script for Ninja build system
+│       ├── linux/                # Ninja binary for Linux
+│       ├── linux-aarch64/        # Ninja binary for Linux (ARM64)
+│       ├── mac/                  # Ninja binary for macOS
+│       ├── win/                  # Ninja binary for Windows
+│       └── winarm64/             # Ninja binary for Windows (ARM64)
+└── unit_test/                    # Unit test source files
+    ├── unit_test.c               # Unit tests for all core functions (UT_01 ~ UT_07) of the IRQ simulator
+    └── unit_test.h               # Header file with unit test assertion macros
+```
+
+#### 简体中文
+```
+├── .clinerules                   # Cline 系统指令：包含项目背景、规则、技能和工作流程
+├── .gitattributes                # 定义按路径划分的属性，主要用于 Git LFS 和行尾符标准化
+├── .gitignore                    # 指定要忽略的未追踪文件
+├── .gitlab-ci.yml                # GitLab CI/CD 流水线定义，用于自动化构建、测试和文档部署
+├── .vscodeignore                 # 指定 VS Code 扩展中要忽略的文件/文件夹
+├── AGENTS.md                     # 定义高级 AI 协作者角色、技术栈和工作原则
+├── CMakeLists.txt                # CMake 构建配置，用于主可执行文件、单元测试和集成测试
+├── mkdocs.yml                    # MkDocs 文档网站生成配置（Material 主题，PDF 插件）
+├── README.md                     # 本文件（项目概览、构建说明、CLI 使用方法和文档链接）
+├── requirements-mcp.txt          # MCP 服务器所需的 Python 包列表
+├── docs/                         # MkDocs 文档（ASPICE V 形图结构）- 包含项目规范、设计和报告
+│   ├── index.md                  # 文档首页（英文）
+│   ├── index_cn.md               # 文档首页（简体中文）
+│   ├── index_tw.md               # 文档首页（繁体中文）
+│   ├── 01_software_requirements/ # SWE.1: 软件需求规格说明书文档（EN/CN/TW）
+│   │   ├── requirement_cn.md     # 简体中文版需求
+│   │   ├── requirement_en.md     # 英文版需求
+│   │   └── requirement_tw.md     # 繁体中文版需求
+│   ├── 02_software_architecture/ # SWE.2: 软件架构设计文档（EN/CN/TW），包含不同版本
+│   │   ├── software_architecture_cn_cline.md # 简体中文架构文档（Cline 生成）
+│   │   ├── software_architecture_cn_gemini.md # 简体中文架构文档（Gemini 生成）
+│   │   ├── software_architecture_cn.md # 简体中文架构文档
+│   │   ├── software_architecture_en_cline.md # 英文架构文档（Cline 生成）
+│   │   ├── software_architecture_en_gemini.md # 英文架构文档（Gemini 生成）
+│   │   ├── software_architecture_en.md # 英文架构文档
+│   │   ├── software_architecture_tw_cline.md # 繁体中文架构文档（Cline 生成）
+│   │   ├── software_architecture_tw_gemini.md # 繁体中文架构文档（Gemini 生成）
+│   │   └── software_architecture_tw.md # 繁体中文架构文档
+│   ├── 03_software_detailed_design/ # SWE.3: 软件详细设计文档（EN/CN/TW）和自动生成的函数文档
+│   │   ├── software_design_cn_cline.md # 简体中文详细设计（Cline 生成）
+│   │   ├── software_design_cn_gemini.md # 简体中文详细设计（Gemini 生成）
+│   │   ├── software_design_cn.md # 简体中文详细设计
+│   │   ├── software_design_en_cline.md # 英文详细设计（Cline 生成）
+│   │   ├── software_design_en_gemini.md # 英文详细设计（Gemini 生成）
+│   │   ├── software_design_en.md # 英文详细设计
+│   │   ├── software_design_tw_cline.md # 繁体中文详细设计（Cline 生成）
+│   │   ├── software_design_tw_gemini.md # 繁体中文详细设计（Gemini 生成）
+│   │   ├── software_design_tw.md # 繁体中文详细设计
+│   │   └── auto_generated/       # 自动生成的函数文档和流程图
+│   │       ├── func_main.md      # main.c 函数的自动生成文档
+│   │       └── index.md          # 自动生成的函数文档索引
+│   ├── 04_software_unit_verification/ # SWE.4: 单元验证文档、测试计划和覆盖率报告
+│   │   ├── coverage_report.md    # 单元测试覆盖率报告的 Markdown 文件
+│   │   ├── unit_test_cn_cline.md # 简体中文单元测试计划（Cline 生成）
+│   │   ├── unit_test_cn_gemini.md # 简体中文单元测试计划（Gemini 生成）
+│   │   ├── unit_test_cn.md       # 简体中文单元测试计划
+│   │   ├── unit_test_en_cline.md # 英文单元测试计划（Cline 生成）
+│   │   ├── unit_test_en_gemini.md # 英文单元测试计划（Gemini 生成）
+│   │   ├── unit_test_en.md       # 英文单元测试计划
+│   │   ├── unit_test_tw_cline.md # 繁体中文单元测试计划（Cline 生成）
+│   │   ├── unit_test_tw_gemini.md # 繁体中文单元测试计划（Gemini 生成）
+│   │   └── unit_test_tw.md       # 繁体中文单元测试计划
+│   ├── 05_software_integration_test/  # SWE.5: 集成测试文档、测试计划、MISRA 和复杂度报告
+│   │   ├── coverage_report.md    # 集成测试覆盖率报告的 Markdown 文件
+│   │   ├── integrated_test_cn_cline.md # 简体中文集成测试计划（Cline 生成）
+│   │   ├── integrated_test_cn_gemini.md # 简体中文集成测试计划（Gemini 生成）
+│   │   ├── integrated_test_cn.md # 简体中文集成测试计划
+│   │   ├── integrated_test_en_cline.md # 英文集成测试计划（Cline 生成）
+│   │   ├── integrated_test_en_gemini.md # 英文集成测试计划（Gemini 生成）
+│   │   ├── integrated_test_en.md # 英文集成测试计划
+│   │   ├── integrated_test_tw_cline.md # 繁体中文集成测试计划（Cline 生成）
+│   │   ├── integrated_test_tw_gemini.md # 繁体中文集成测试计划（Gemini 生成）
+│   │   ├── integrated_test_tw.md # 繁体中文集成测试计划
+│   │   ├── lizard_report.md      # 圈复杂度与 NLOC 分析报告
+│   │   └── misra_report.md       # MISRA C 静态分析报告
+│   ├── code_review_record/       # 存储逐项代码审查历史
+│   │   └── code_review.md        # 详细代码审查记录
+│   ├── javascripts/              # 文档网站功能的 JavaScript 文件
+│   │   └── lang-switcher.js      # 语言切换功能的脚本
+│   ├── stylesheets/              # 文档网站样式的 CSS 文件
+│   │   └── extra.css             # 额外的自定义 CSS 样式
+│   ├── misra/                    # MISRA C 规则定义或相关文件
+│   │   └── MISRA_Rule.txt        # 包含 MISRA 规则描述的文本文件
+│   └── trae/                     # 占位符目录（例如，用于项目特定资产）
+│       └── .gitkeep              # 确保即使为空目录也能被 Git 追踪
+├── inc/                          # C 头文件
+│   └── main.h                    # IRQ 模拟器的公共 API、类型定义和测试可见性宏
+├── integration_test/             # 集成测试源文件
+│   ├── integrated_test.c         # IRQ 模拟器 CLI 的端到端集成测试（IT_01 ~ IT_07）
+│   └── integrated_test.h         # 包含集成测试断言宏的头文件
+├── src/                          # C 源代码
+│   ├── main.c                    # IRQ 模拟器核心逻辑、CLI 主循环和中断处理函数
+│   ├── main.c.ctu-info           # Clang Tidy Unused 文件（工具生成的静态分析文件）
+│   ├── make_misra_error.c        # 故意违反 MISRA 的演示文件，用于展示 MISRA 违规
+│   └── start.s                   # 汇编启动代码和中断向量桩
+├── tools/                        # Python 自动化工具和实用程序
+│   ├── gen_code_review.py        # 检测 src/ 变更并管理逐项代码审查记录
+│   ├── gen_coverage_report.py    # 构建和运行单元测试，然后生成 gcovr HTML 覆盖率报告
+│   ├── gen_func_docs.py          # 从 C 源代码自动生成带 Mermaid 流程图的函数文档
+│   ├── gen_integration_coverage_report.py  # 构建和运行集成测试，然后生成覆盖率报告
+│   ├── gen_misra_report.py       # 运行 cppcheck 与 MISRA 附加组件，生成 MISRA C 2012 静态分析报告
+│   ├── run_lizard.py             # 使用 Lizard 生成圈复杂度 / NLOC / 参数计数报告
+│   └── ninja/                    # 包含适用于不同平台的预编译 Ninja 二进制文件的目录
+│       ├── ninja_env.cmake       # Ninja 构建系统的 CMake 环境脚本
+│       ├── linux/                # Linux 平台的 Ninja 二进制文件
+│       ├── linux-aarch64/        # Linux (ARM64) 平台的 Ninja 二进制文件
+│       ├── mac/                  # macOS 平台的 Ninja 二进制文件
+│       ├── win/                  # Windows 平台的 Ninja 二进制文件
+│       └── winarm64/             # Windows (ARM64) 平台的 Ninja 二进制文件
+└── unit_test/                    # 单元测试源文件
+    ├── unit_test.c               # IRQ 模拟器所有核心函数（UT_01 ~ UT_07）的单元测试
+    └── unit_test.h               # 包含单元测试断言宏的头文件
+```
+
+#### 繁體中文
+```
+├── .clinerules                   # Cline 系統指令：包含專案背景、規則、技能和工作流程
+├── .gitattributes                # 定義按路徑劃分的屬性，主要用於 Git LFS 和換行符標準化
+├── .gitignore                    # 指定要忽略的未追蹤檔案
+├── .gitlab-ci.yml                # GitLab CI/CD 管線定義，用於自動化建構、測試和文件部署
+├── .vscodeignore                 # 指定 VS Code 擴充功能中要忽略的檔案/資料夾
+├── AGENTS.md                     # 定義進階 AI 協作者角色、技術棧和工作原則
+├── CMakeLists.txt                # CMake 建構配置，用於主執行檔、單元測試和整合測試
+├── mkdocs.yml                    # MkDocs 文件網站生成配置（Material 主題，PDF 外掛）
+├── README.md                     # 本檔案（專案概覽、建構說明、CLI 使用方法和文件連結）
+├── requirements-mcp.txt          # MCP 伺服器所需的 Python 套件列表
+├── docs/                         # MkDocs 文件（ASPICE V 形圖結構）- 包含專案規格、設計和報告
+│   ├── index.md                  # 文件首頁（英文）
+│   ├── index_cn.md               # 文件首頁（簡體中文）
+│   ├── index_tw.md               # 文件首頁（繁體中文）
+│   ├── 01_software_requirements/ # SWE.1: 軟體需求規格說明書文件（EN/CN/TW）
+│   │   ├── requirement_cn.md     # 簡體中文版需求
+│   │   ├── requirement_en.md     # 英文版需求
+│   │   └── requirement_tw.md     # 繁體中文版需求
+│   ├── 02_software_architecture/ # SWE.2: 軟體架構設計文件（EN/CN/TW），包含不同版本
+│   │   ├── software_architecture_cn_cline.md # 簡體中文架構文件（Cline 生成）
+│   │   ├── software_architecture_cn_gemini.md # 簡體中文架構文件（Gemini 生成）
+│   │   ├── software_architecture_cn.md # 簡體中文架構文件
+│   │   ├── software_architecture_en_cline.md # 英文架構文件（Cline 生成）
+│   │   ├── software_architecture_en_gemini.md # 英文架構文件（Gemini 生成）
+│   │   ├── software_architecture_en.md # 英文架構文件
+│   │   ├── software_architecture_tw_cline.md # 繁體中文架構文件（Cline 生成）
+│   │   ├── software_architecture_tw_gemini.md # 繁體中文架構文件（Gemini 生成）
+│   │   └── software_architecture_tw.md # 繁體中文架構文件
+│   ├── 03_software_detailed_design/ # SWE.3: 軟體細部設計文件（EN/CN/TW）和自動生成的函式文件
+│   │   ├── software_design_cn_cline.md # 簡體中文細部設計（Cline 生成）
+│   │   ├── software_design_cn_gemini.md # 簡體中文細部設計（Gemini 生成）
+│   │   ├── software_design_cn.md # 簡體中文細部設計
+│   │   ├── software_design_en_cline.md # 英文細部設計（Cline 生成）
+│   │   ├── software_design_en_gemini.md # 英文細部設計（Gemini 生成）
+│   │   ├── software_design_en.md # 英文細部設計
+│   │   ├── software_design_tw_cline.md # 繁體中文細部設計（Cline 生成）
+│   │   ├── software_design_tw_gemini.md # 繁體中文細部設計（Gemini 生成）
+│   │   ├── software_design_tw.md # 繁體中文細部設計
+│   │   └── auto_generated/       # 自動生成的函式文件和流程圖
+│   │       ├── func_main.md      # main.c 函式的自動生成文件
+│   │       └── index.md          # 自動生成的函式文件索引
+│   ├── 04_software_unit_verification/ # SWE.4: 單元驗證文件、測試計畫和覆蓋率報告
+│   │   ├── coverage_report.md    # 單元測試覆蓋率報告的 Markdown 檔案
+│   │   ├── unit_test_cn_cline.md # 簡體中文單元測試計畫（Cline 生成）
+│   │   ├── unit_test_cn_gemini.md # 簡體中文單元測試計畫（Gemini 生成）
+│   │   ├── unit_test_cn.md       # 簡體中文單元測試計畫
+│   │   ├── unit_test_en_cline.md # 英文單元測試計畫（Cline 生成）
+│   │   ├── unit_test_en_gemini.md # 英文單元測試計畫（Gemini 生成）
+│   │   ├── unit_test_en.md       # 英文單元測試計畫
+│   │   ├── unit_test_tw_cline.md # 繁體中文單元測試計畫（Cline 生成）
+│   │   ├── unit_test_tw_gemini.md # 繁體中文單元測試計畫（Gemini 生成）
+│   │   └── unit_test_tw.md       # 繁體中文單元測試計畫
+│   ├── 05_software_integration_test/  # SWE.5: 整合測試文件、測試計畫、MISRA 和複雜度報告
+│   │   ├── coverage_report.md    # 整合測試覆蓋率報告的 Markdown 檔案
+│   │   ├── integrated_test_cn_cline.md # 簡體中文整合測試計畫（Cline 生成）
+│   │   ├── integrated_test_cn_gemini.md # 簡體中文整合測試計畫（Gemini 生成）
+│   │   ├── integrated_test_cn.md # 簡體中文整合測試計畫
+│   │   ├── integrated_test_en_cline.md # 英文整合測試計畫（Cline 生成）
+│   │   ├── integrated_test_en_gemini.md # 英文整合測試計畫（Gemini 生成）
+│   │   ├── integrated_test_en.md # 英文整合測試計畫
+│   │   ├── integrated_test_tw_cline.md # 繁體中文整合測試計畫（Cline 生成）
+│   │   ├── integrated_test_tw_gemini.md # 繁體中文整合測試計畫（Gemini 生成）
+│   │   ├── integrated_test_tw.md # 繁體中文整合測試計畫
+│   │   ├── lizard_report.md      # 迴圈複雜度與 NLOC 分析報告
+│   │   └── misra_report.md       # MISRA C 靜態分析報告
+│   ├── code_review_record/       # 儲存逐項程式碼審查歷史
+│   │   └── code_review.md        # 詳細程式碼審查記錄
+│   ├── javascripts/              # 文件網站功能的 JavaScript 檔案
+│   │   └── lang-switcher.js      # 語言切換功能的腳本
+│   ├── stylesheets/              # 文件網站樣式的 CSS 檔案
+│   │   └── extra.css             # 額外的自訂 CSS 樣式
+│   ├── misra/                    # MISRA C 規則定義或相關檔案
+│   │   └── MISRA_Rule.txt        # 包含 MISRA 規則描述的文字檔案
+│   └── trae/                     # 佔位符目錄（例如，用於專案特定資產）
+│       └── .gitkeep              # 確保即使為空目錄也能被 Git 追蹤
+├── inc/                          # C 標頭檔
+│   └── main.h                    # IRQ 模擬器的公共 API、型別定義和測試可見性巨集
+├── integration_test/             # 整合測試原始檔
+│   ├── integrated_test.c         # IRQ 模擬器 CLI 的端到端整合測試（IT_01 ~ IT_07）
+│   └── integrated_test.h         # 包含整合測試斷言巨集的標頭檔
+├── src/                          # C 原始碼
+│   ├── main.c                    # IRQ 模擬器核心邏輯、CLI 主迴圈和中斷處理函式
+│   ├── main.c.ctu-info           # Clang Tidy Unused 檔案（工具生成的靜態分析檔案）
+│   ├── make_misra_error.c        # 刻意違反 MISRA 的展示檔案，用於展示 MISRA 違規
+│   └── start.s                   # 組合語言啟動程式和中斷向量樁
+├── tools/                        # Python 自動化工具和實用程式
+│   ├── gen_code_review.py        # 偵測 src/ 變更並管理逐項程式碼審查記錄
+│   ├── gen_coverage_report.py    # 建構和執行單元測試，然後生成 gcovr HTML 覆蓋率報告
+│   ├── gen_func_docs.py          # 從 C 原始碼自動生成帶 Mermaid 流程圖的函式文件
+│   ├── gen_integration_coverage_report.py  # 建構和執行整合測試，然後生成覆蓋率報告
+│   ├── gen_misra_report.py       # 執行 cppcheck 與 MISRA 附加元件，生成 MISRA C 2012 靜態分析報告
+│   ├── run_lizard.py             # 使用 Lizard 生成迴圈複雜度 / NLOC / 參數計數報告
+│   └── ninja/                    # 包含適用於不同平台的預編譯 Ninja 二進位檔案的目錄
+│       ├── ninja_env.cmake       # Ninja 建構系統的 CMake 環境腳本
+│       ├── linux/                # Linux 平台的 Ninja 二進位檔案
+│       ├── linux-aarch64/        # Linux (ARM64) 平台的 Ninja 二進位檔案
+│       ├── mac/                  # macOS 平台的 Ninja 二進位檔案
+│       ├── win/                  # Windows 平台的 Ninja 二進位檔案
+│       └── winarm64/             # Windows (ARM64) 平台的 Ninja 二進位檔案
+└── unit_test/                    # 單元測試原始檔
+    ├── unit_test.c               # IRQ 模擬器所有核心函式（UT_01 ~ UT_07）的單元測試
+    └── unit_test.h               # 包含單元測試斷言巨集的標頭檔
 ```
 
 ### Build & Run
